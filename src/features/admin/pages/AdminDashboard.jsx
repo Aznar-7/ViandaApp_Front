@@ -1,17 +1,79 @@
 import { motion } from 'motion/react'
-import { LayoutDashboard } from 'lucide-react'
+import { ClipboardList } from 'lucide-react'
+import { useAdminPedidos } from '../hooks/useAdminPedidos'
+import { useResumen } from '../hooks/useResumen'
+import ResumenPanel from '../components/ResumenPanel'
+import AdminTable from '../components/AdminTable'
+import PedidoFilters from '@/features/pedidos/components/PedidoFilters'
+import { TableRowSkeleton } from '@/shared/components/Skeleton'
+import EmptyState from '@/shared/components/EmptyState'
+import ErrorMessage from '@/shared/components/ErrorMessage'
+import Pagination from '@/shared/components/Pagination'
+import CommandHeader from '@/shared/components/CommandHeader'
 
 export default function AdminDashboard() {
+  const { resumen, isLoading: loadingResumen } = useResumen()
+  const { pedidos, total, page, limit, isLoading, error, filters, setFilters, refetch, updateRow } = useAdminPedidos()
+
+  const totalPages = Math.ceil(total / limit)
+  const hasFilters = filters.estado !== '' || !!filters.fecha
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center py-24 gap-3 text-center"
-    >
-      <LayoutDashboard className="w-10 h-10 text-muted-foreground/30" />
-      <p className="font-orbitron text-[10px] tracking-[0.4em] uppercase text-muted-foreground">
-        Panel Imperial — Fase 5
-      </p>
+    <motion.div className="admin-workspace" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+
+      <CommandHeader
+        eyebrow="Resumen Administrativo"
+        title="Control de Operaciones"
+        code="ADM / O66"
+        description={!isLoading && !error ? `${total} pedido${total !== 1 ? 's' : ''} bajo supervisión del sistema.` : 'Supervisión de pedidos, estados y acciones operativas.'}
+      />
+
+      {/* Stat cards */}
+      <div className="mb-7">
+        <ResumenPanel resumen={resumen} isLoading={loadingResumen} />
+      </div>
+
+      {/* Filters */}
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-foreground">Registro de pedidos</h2>
+        </div>
+        <PedidoFilters filters={filters} onChange={setFilters} />
+      </div>
+
+      {/* Table / States */}
+      {error && <ErrorMessage message={error} onRetry={refetch} />}
+
+      {!error && !isLoading && pedidos.length === 0 && (
+        <EmptyState
+          icon={ClipboardList}
+          title="Sin pedidos"
+          description={hasFilters ? 'Ningún pedido coincide con los filtros.' : 'No hay pedidos registrados.'}
+          action={hasFilters ? () => setFilters({ estado: '', fecha: '', page: 1, limit: 15 }) : undefined}
+          actionLabel="Limpiar filtros"
+        />
+      )}
+
+      {!error && isLoading && (
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <table className="w-full">
+            <tbody>
+              {Array.from({ length: 8 }).map((_, i) => <TableRowSkeleton key={i} cols={9} />)}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!error && !isLoading && pedidos.length > 0 && (
+        <>
+          <AdminTable pedidos={pedidos} onRowUpdated={updateRow} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={(p) => setFilters((f) => ({ ...f, page: p }))}
+          />
+        </>
+      )}
     </motion.div>
   )
 }

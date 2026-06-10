@@ -6,56 +6,26 @@ import { cn } from '@/lib/utils'
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden px-4">
-      {/* Scanlines */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, oklch(0.92 0.006 78) 3px, oklch(0.92 0.006 78) 4px)' }}
-      />
-
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center z-10"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="text-center"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 1.4 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-          className="font-orbitron font-black text-[clamp(5rem,18vw,10rem)] leading-none select-none text-primary/10 mb-2"
-        >
+        <div className="font-orbitron font-black text-[clamp(5rem,18vw,9rem)] leading-none select-none text-primary/10 mb-4">
           404
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="font-orbitron text-lg tracking-[0.25em] uppercase text-foreground mb-2"
-        >
-          Sector No Encontrado
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-          className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto"
-        >
-          Las coordenadas ingresadas no corresponden a ningún sector conocido del Imperio Galáctico.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Link to="/" className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}>
-            <Home className="w-4 h-4" />
-            <span className="font-orbitron text-[10px] tracking-widest uppercase">Base Imperial</span>
-          </Link>
-        </motion.div>
+        </div>
+        <p className="font-orbitron text-lg tracking-[0.2em] uppercase text-[#F8FAFC] mb-2">
+          Ruta no encontrada
+        </p>
+        <p className="text-sm text-[#94A3B8] mb-8 max-w-xs mx-auto">
+          La sección que buscás no existe. Revisá la URL o volvé al inicio.
+        </p>
+        <Link to="/" className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}>
+          <Home className="w-4 h-4" />
+          <span className="font-orbitron text-[10px] tracking-widest uppercase">Panel Central</span>
+        </Link>
       </motion.div>
     </div>
   )

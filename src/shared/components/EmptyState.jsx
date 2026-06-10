@@ -1,29 +1,42 @@
+import { motion } from 'motion/react'
 import { PackageX } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export default function EmptyState({
   icon: Icon = PackageX,
   title = 'Sin resultados',
-  description = 'No se encontraron registros en el sistema.',
+  description = 'No se encontraron registros.',
   action,
-  actionLabel = 'Volver',
+  actionLabel = 'Limpiar filtros',
+  className,
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-      <div className="p-4 rounded-full bg-secondary border border-border">
-        <Icon className="w-8 h-8 text-muted-foreground" />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className={cn('empty-state flex flex-col items-center justify-center py-16 px-5 gap-5 text-center', className)}
+    >
+      <div className="relative">
+        <div className="w-16 h-16 rounded-full bg-secondary border border-border flex items-center justify-center">
+          <Icon className="w-7 h-7 text-muted-foreground" />
+        </div>
+        <div className="absolute -inset-3 rounded-full border border-dashed border-border" />
       </div>
-      <div className="space-y-1">
-        <p className="font-orbitron text-xs tracking-[0.3em] uppercase text-foreground">
-          {title}
-        </p>
+
+      <div className="space-y-1.5">
+        <p className="font-semibold text-foreground">{title}</p>
         <p className="text-sm text-muted-foreground max-w-xs">{description}</p>
       </div>
+
       {action && (
-        <Button variant="outline" size="sm" onClick={action}>
+        <button
+          onClick={action}
+          className="px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-150"
+        >
           {actionLabel}
-        </Button>
+        </button>
       )}
-    </div>
+    </motion.div>
   )
 }

@@ -1,44 +1,41 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 import authService from '@/features/auth/services/authService'
 
 const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [token, setToken] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+function readUser() {
+  try {
+    const stored = localStorage.getItem('user')
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    localStorage.removeItem('user')
+    return null
+  }
+}
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
-    if (storedToken && storedUser) {
-      try {
-        setToken(storedToken)
-        setUser(JSON.parse(storedUser))
-      } catch {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-      }
-    }
-    setIsLoading(false)
-  }, [])
+export function AuthProvider({ children }) {
+  const [user, setUser]   = useState(readUser)
+  const [token, setToken] = useState(() => localStorage.getItem('token'))
+  const isLoading         = false
 
   const login = useCallback(async (credentials) => {
-    const { user, token } = await authService.login(credentials)
+    const { token, usuario } = await authService.login(credentials)
     localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('user', JSON.stringify(usuario))
     setToken(token)
-    setUser(user)
-    return user
+    setUser(usuario)
+    return usuario
   }, [])
 
   const register = useCallback(async (data) => {
-    const { user, token } = await authService.register(data)
+    await authService.register(data)
+    // Register returns only the user; auto-login to obtain token
+    const { token, usuario } = await authService.login({ email: data.email, password: data.password })
     localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('user', JSON.stringify(usuario))
     setToken(token)
-    setUser(user)
-    return user
+    setUser(usuario)
+    return usuario
   }, [])
 
   const logout = useCallback(() => {
@@ -57,6 +54,7 @@ export function AuthProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
