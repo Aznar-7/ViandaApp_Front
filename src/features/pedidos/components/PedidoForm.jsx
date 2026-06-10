@@ -69,7 +69,7 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
   }, [isEdit, watchFecha])
 
   const selectedMenu = useMemo(
-    () => menus.find((m) => String(m.id) === String(watchMenuId)),
+    () => menus.find((m) => String(m.id) === String(watchMenuId)) ?? null,
     [menus, watchMenuId]
   )
 

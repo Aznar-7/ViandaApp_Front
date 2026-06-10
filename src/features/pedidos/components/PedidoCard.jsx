@@ -3,16 +3,9 @@ import { motion } from 'motion/react'
 import { Calendar, Users, Clock, MapPin, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate, formatCurrency } from '@/shared/utils'
-import StatusBadge from './StatusBadge'
+import StatusBadge, { ESTADO_VISUAL } from './StatusBadge'
 import { CANCELABLE_ESTADOS } from '../constants'
 import CancelButton from './CancelButton'
-
-const STATUS_LEFT_BORDER = {
-  pendiente:  'border-l-[#FACC15]',
-  confirmado: 'border-l-[#38BDF8]',
-  entregado:  'border-l-[#22C55E]',
-  cancelado:  'border-l-[#EF4444]',
-}
 
 function MetaItem({ icon: Icon, children }) {
   return (
@@ -24,7 +17,7 @@ function MetaItem({ icon: Icon, children }) {
 }
 
 export default function PedidoCard({ pedido, onCanceled }) {
-  const leftBorder = STATUS_LEFT_BORDER[pedido.estado] ?? STATUS_LEFT_BORDER.pendiente
+  const leftBorder = (ESTADO_VISUAL[pedido.estado] ?? ESTADO_VISUAL.pendiente).leftBorder
 
   return (
     <motion.article

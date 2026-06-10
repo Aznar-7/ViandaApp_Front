@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import authService from '@/features/auth/services/authService'
 
 const AuthContext = createContext(null)
@@ -16,7 +17,8 @@ function readUser() {
 export function AuthProvider({ children }) {
   const [user, setUser]   = useState(readUser)
   const [token, setToken] = useState(() => localStorage.getItem('token'))
-  const isLoading         = false
+  const [isLoading]       = useState(false)
+  const navigate          = useNavigate()
 
   const login = useCallback(async (credentials) => {
     const { token, usuario } = await authService.login(credentials)
@@ -43,7 +45,15 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-  }, [])
+    navigate('/login', { replace: true })
+  }, [navigate])
+
+  // Handle 401 from axios interceptor without full page reload
+  useEffect(() => {
+    const handler = () => logout()
+    window.addEventListener('auth:unauthorized', handler)
+    return () => window.removeEventListener('auth:unauthorized', handler)
+  }, [logout])
 
   const isAdmin = user?.rol === 'admin'
 

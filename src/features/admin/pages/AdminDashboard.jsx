@@ -22,10 +22,10 @@ export default function AdminDashboard() {
     <motion.div className="admin-workspace" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
 
       <CommandHeader
-        eyebrow="Resumen Administrativo"
+        eyebrow="Centro de Comando Imperial"
         title="Control de Operaciones"
         code="ADM / O66"
-        description={!isLoading && !error ? `${total} pedido${total !== 1 ? 's' : ''} bajo supervisión del sistema.` : 'Supervisión de pedidos, estados y acciones operativas.'}
+        description={!isLoading && !error ? `${total} provisión${total !== 1 ? 'es' : ''} bajo supervisión del Imperio.` : 'Supervisión de provisiones, estados y acciones operativas.'}
       />
 
       {/* Stat cards */}
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
       {/* Filters */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-foreground">Registro de pedidos</h2>
+          <h2 className="font-semibold text-foreground">Registro de provisiones</h2>
         </div>
         <PedidoFilters filters={filters} onChange={setFilters} />
       </div>

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import adminService from '../services/adminService'
+import { PAGE_SIZES } from '@/shared/constants'
 
 export function useAdminPedidos(initialFilters = {}) {
-  const [data, setData]       = useState({ pedidos: [], total: 0, page: 1, limit: 15 })
-  const [filters, setFilters] = useState({ page: 1, limit: 15, ...initialFilters })
+  const [data, setData]       = useState({ pedidos: [], total: 0, page: 1, limit: PAGE_SIZES.adminPedidos })
+  const [filters, setFilters] = useState({ page: 1, limit: PAGE_SIZES.adminPedidos, ...initialFilters })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError]         = useState(null)
 

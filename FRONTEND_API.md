@@ -10,6 +10,7 @@ Este documento describe el contrato actual del backend para su consumo desde fro
 - Header para requests con body: `Content-Type: application/json`
 - Limite del body: `10kb`
 - Origen permitido por defecto: `http://localhost:5173`
+- Imagenes publicas: `http://localhost:3000/assets/<archivo>`
 
 Todos los endpoints de pedidos requieren:
 
@@ -37,6 +38,7 @@ Codigos posibles:
 | `401` | Credenciales invalidas, token ausente, invalido o expirado |
 | `403` | Usuario inactivo, rol insuficiente o acceso a un pedido ajeno |
 | `404` | Ruta, menu o pedido inexistente |
+| `409` | Conflicto por email duplicado o modificacion concurrente |
 | `429` | Mas de 20 intentos de login/registro en 15 minutos |
 | `500` | Error interno no controlado |
 
@@ -78,11 +80,16 @@ Valores de `rol`: `usuario`, `admin`.
   "precio": 1000,
   "cupoDiario": 8,
   "activo": 1,
+  "imagenUrl": "/assets/mondongo.jpg",
   "cupoDisponible": 5
 }
 ```
 
 Valores de `tipo`: `clasico`, `vegetariano`, `vegano`, `sin_tacc`.
+
+`imagenUrl` es una URL relativa nullable. Para mostrarla, concatenar el origen del
+backend, por ejemplo: `http://localhost:3000${menu.imagenUrl}`. Si llega `null`,
+el frontend debe mostrar un placeholder.
 
 ### Pedido
 
@@ -131,6 +138,8 @@ Validaciones:
 - `email`: string obligatorio con formato de email.
 - `password`: string obligatorio, entre 6 y 72 caracteres.
 - El email debe ser unico.
+- El backend normaliza nombre y email; el email se guarda en minusculas.
+- Los campos no documentados son rechazados.
 - Todo usuario registrado desde este endpoint recibe rol `usuario`.
 
 Response `201`:
@@ -145,7 +154,7 @@ Response `201`:
 }
 ```
 
-Error relevante: `400` con `El email ya esta registrado`.
+Error relevante: `409` con `El email ya esta registrado`.
 
 ### Iniciar sesion
 
@@ -181,6 +190,7 @@ Errores relevantes:
 - `403`: `Usuario inactivo`.
 
 El frontend debe persistir `token` y `usuario`, adjuntar el token a pedidos y cerrar la sesion cuando reciba un `401`.
+El backend revalida que el usuario siga activo y usa su rol actual en cada request protegido.
 
 ## Menus
 
@@ -197,6 +207,8 @@ Query params opcionales:
 | `tipo` | `vegano` | Filtra por tipo exacto |
 | `fecha` | `2026-06-10` | Filtra por fecha exacta |
 | `activo` | `0` o `1` | Por defecto devuelve solo activos (`1`) |
+
+Valores invalidos de `tipo`, `fecha` o `activo` devuelven `400`.
 
 Ejemplo:
 
@@ -217,12 +229,14 @@ Response `200`:
     "precio": 1000,
     "cupoDiario": 8,
     "activo": 1,
+    "imagenUrl": "/assets/mondongo.jpg",
     "cupoDisponible": 5
   }
 ]
 ```
 
-`cupoDisponible` descuenta solamente pedidos `pendiente` y `confirmado`.
+`cupoDisponible` descuenta pedidos `pendiente`, `confirmado` y `entregado`.
+Las imagenes se sirven con cache HTTP por 1 dia y permiten carga cross-origin.
 
 ## Pedidos
 
@@ -314,8 +328,8 @@ Body:
 Validaciones:
 
 - `menuId`: number obligatorio.
-- `fecha`: string obligatorio con formato `YYYY-MM-DD`.
-- `cantidad`: number obligatorio, minimo `1`.
+- `fecha`: string obligatorio que represente una fecha real con formato `YYYY-MM-DD`.
+- `cantidad`: number entero obligatorio, minimo `1`.
 - `turnoEntrega`: obligatorio, `almuerzo` o `cena`.
 - `puntoRetiro`: string obligatorio, entre 2 y 200 caracteres.
 - `observaciones`: string opcional, maximo 500 caracteres.
@@ -472,7 +486,7 @@ Consideraciones:
 - `porEstado` solo incluye estados que tengan al menos un pedido.
 - `recaudado` suma pedidos `confirmado` y `entregado`.
 - `menuDelDia` usa la fecha actual del servidor y puede ser `null`.
-- `menuDelDia` cuenta todos los pedidos del dia, incluso cancelados.
+- `menuDelDia` excluye pedidos cancelados.
 
 ## Flujo de estados
 
@@ -485,7 +499,7 @@ confirmado -> entregado   (admin)
 
 `cancelado` y `entregado` son estados finales.
 
-Los pedidos `pendiente` y `confirmado` consumen cupo. Los pedidos `cancelado` y `entregado` no consumen cupo.
+Los pedidos `pendiente`, `confirmado` y `entregado` consumen cupo. Los pedidos `cancelado` no consumen cupo.
 
 ## Flujos sugeridos para frontend
 
@@ -522,9 +536,13 @@ Los pedidos `pendiente` y `confirmado` consumen cupo. Los pedidos `cancelado` y 
 ## Observaciones del contrato actual
 
 - No existe endpoint para crear, editar o eliminar menus.
+- No existe upload de imagenes; `imagenUrl` se administra actualmente desde datos
+  semilla o base de datos.
+- Las imagenes viven en disco local. Para multiples instancias se debe migrar a
+  almacenamiento de objetos y CDN.
 - No existe endpoint para obtener el usuario actual; la identidad se toma del response de login.
 - No existen refresh tokens.
 - Los filtros de menus no tienen validacion explicita; conviene enviar solo valores documentados.
 - Las fechas son strings y el backend espera `YYYY-MM-DD` al crear pedidos.
-- Los campos extra enviados en bodies son ignorados por los controladores.
+- Los campos extra enviados en bodies son rechazados con `400`.
 - Para evitar inconsistencias visuales, usar siempre el pedido devuelto por cada mutacion.

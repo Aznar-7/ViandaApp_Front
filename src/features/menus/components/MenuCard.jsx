@@ -24,7 +24,7 @@ export default function MenuCard({ menu }) {
 
   return (
     <motion.article
-      whileHover={isFull ? {} : { y: -2 }}
+      whileHover={isFull ? {} : { y: -2, boxShadow: '0 8px 32px -8px rgba(225,29,72,0.18)' }}
       transition={{ duration: 0.14, ease: 'easeOut' }}
       className={cn('menu-catalog-card relative flex flex-col overflow-hidden', isFull && 'opacity-60')}
     >
@@ -36,13 +36,16 @@ export default function MenuCard({ menu }) {
         <span className={cn('absolute left-3 top-3 inline-flex items-center rounded-md border px-2 py-0.5 font-orbitron text-[8px] uppercase tracking-widest', tipo.badge)}>
           {tipo.label}
         </span>
-        <span className={cn(
-          'absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border bg-white/75 px-2 py-0.5 text-xs font-semibold',
-          isFull ? 'border-red-200 text-red-700' : isLow ? 'border-amber-200 text-amber-700' : 'border-emerald-200 text-emerald-700'
-        )}>
-          {isFull ? <AlertTriangle className="h-2.5 w-2.5" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
-          {cupoDisp}/{cupoTotal}
-        </span>
+        {isLow && !isFull && (
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-400/20 px-2 py-0.5 font-orbitron text-[8px] uppercase tracking-wider text-amber-600">
+            <AlertTriangle className="h-2.5 w-2.5" />Últimas raciones
+          </span>
+        )}
+        {isFull && (
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-red-400/50 bg-red-400/20 px-2 py-0.5 font-orbitron text-[8px] uppercase tracking-wider text-red-600">
+            Agotado
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-3">

@@ -9,7 +9,7 @@ export default function MenuFilters({ filters, onChange }) {
     <div className="filter-console flex flex-col sm:flex-row sm:items-center gap-3">
       {/* Tipo pills */}
       <div className="flex flex-wrap gap-2">
-        {TIPOS_FILTER.map(({ value, label }) => {
+        {TIPOS_FILTER.map(({ value, label, activeClass }) => {
           const active = filters.tipo === value
           return (
             <button
@@ -19,7 +19,7 @@ export default function MenuFilters({ filters, onChange }) {
               className={cn(
                 'px-3.5 py-1.5 rounded-md border text-sm font-medium transition-all duration-150',
                 active
-                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  ? activeClass
                   : 'border-border text-muted-foreground hover:text-foreground hover:bg-secondary'
               )}
             >

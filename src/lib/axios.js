@@ -17,14 +17,12 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status
     if (status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.replace('/login')
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
       return Promise.reject(error)
     }
-    if (status === 403) toast.error('Sin permisos para realizar esta acción')
-    else if (status === 404) toast.error('Recurso no encontrado')
-    else if (status === 500) toast.error('Error interno del servidor')
+    if (status === 403) toast.error('Acceso denegado', { description: 'Sin permisos para esta operación.' })
+    else if (status === 404) toast.error('Recurso no encontrado', { description: 'El sector solicitado no existe en el Imperio.' })
+    else if (status === 500) toast.error('Fallo en el servidor imperial', { description: 'Error interno. Los técnicos han sido alertados.' })
     return Promise.reject(error)
   }
 )

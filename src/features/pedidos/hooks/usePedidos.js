@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import pedidoService from '../services/pedidoService'
+import { PAGE_SIZES } from '@/shared/constants'
 
 export function usePedidos(initialFilters = {}) {
-  const [data, setData]       = useState({ pedidos: [], total: 0, page: 1, limit: 10 })
-  const [filters, setFilters] = useState({ page: 1, limit: 10, ...initialFilters })
+  const [data, setData]       = useState({ pedidos: [], total: 0, page: 1, limit: PAGE_SIZES.pedidos })
+  const [filters, setFilters] = useState({ page: 1, limit: PAGE_SIZES.pedidos, ...initialFilters })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError]         = useState(null)
 

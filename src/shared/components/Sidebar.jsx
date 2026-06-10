@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   ClipboardList, Gauge, LogOut, Plus, ShieldCheck,
-  UtensilsCrossed, X,
+  UtensilsCrossed, X, UserCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -16,6 +16,7 @@ const USER_SECTIONS = [
       { to: '/dashboard', icon: Gauge, label: 'Inicio', description: 'Resumen del día', code: '01' },
       { to: '/menus', icon: UtensilsCrossed, label: 'Elegir menú', description: 'Raciones y cupos', code: '02' },
       { to: '/pedidos', icon: ClipboardList, label: 'Mis pedidos', description: 'Estado e historial', code: '03' },
+      { to: '/perfil', icon: UserCircle, label: 'Mi perfil', description: 'Datos y seguridad', code: '04' },
     ],
   },
 ]
@@ -136,10 +137,12 @@ function SidebarContent({ onClose }) {
 
       <div className="sidebar-session">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="sidebar-avatar">{user?.nombre?.charAt(0)?.toUpperCase() ?? '?'}</div>
+          <Link to="/perfil" onClick={onClose} className="sidebar-avatar shrink-0 hover:ring-2 hover:ring-sidebar-primary/40 transition-all">
+            {user?.nombre?.charAt(0)?.toUpperCase() ?? '?'}
+          </Link>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium text-[#F8FAFC]">{user?.nombre}</div>
-            <div className="technical-label mt-1">{isAdmin ? 'Administrador' : 'Usuario autenticado'}</div>
+            <div className="technical-label mt-0.5">{isAdmin ? 'Administrador Imperial' : 'Operador autenticado'}</div>
           </div>
           <button type="button" onClick={handleLogout} className="sidebar-logout" aria-label="Cerrar sesión">
             <LogOut className="size-4" />

@@ -14,6 +14,7 @@ const ROUTE_CONTEXT = [
   { match: (path) => path.startsWith('/admin/'), section: 'Administración', title: 'Historial operativo' },
   { match: (path) => path === '/admin', section: 'Administración', title: 'Control de operaciones' },
   { match: (path) => path === '/dashboard', section: 'Inicio', title: 'Panel central' },
+  { match: (path) => path === '/perfil', section: 'Cuenta', title: 'Mi perfil imperial' },
 ]
 
 export default function Topbar({ onMenuClick, className }) {

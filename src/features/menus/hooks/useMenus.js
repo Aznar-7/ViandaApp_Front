@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import menuService from '../services/menuService'
+import { PAGE_SIZES } from '@/shared/constants'
 
 export function useMenus() {
   const [allMenus, setAllMenus] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [filters, setFilters] = useState({ tipo: '', fecha: '', page: 1, limit: 9 })
+  const [filters, setFilters] = useState({ tipo: '', fecha: '', page: 1, limit: PAGE_SIZES.menus })
 
   useEffect(() => {
     setIsLoading(true)
