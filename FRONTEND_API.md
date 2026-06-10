@@ -12,6 +12,11 @@ Este documento describe el contrato actual del backend para su consumo desde fro
 - Origen permitido por defecto: `http://localhost:5173`
 - Imagenes publicas: `http://localhost:3000/assets/<archivo>`
 
+En produccion, el backend requiere `CORS_ORIGIN` con la URL publica exacta del
+frontend. Se pueden configurar varios origins separados por coma. Un frontend no
+incluido puede recibir la respuesta HTTP, pero el navegador no le permite leerla
+porque el backend omite `Access-Control-Allow-Origin`.
+
 Todos los endpoints de pedidos requieren:
 
 ```http

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
+  <title id="title">Orden 66 Viandas</title>
+  <desc id="desc">Sistema profesional de pedidos de viandas con identidad de centro de comando.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080a0e"/>
+      <stop offset="0.58" stop-color="#11151d"/>
+      <stop offset="1" stop-color="#1a1015"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#e11d48" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#e11d48" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".035"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000" flood-opacity=".42"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="520" rx="30" fill="url(#bg)"/>
+  <rect width="1280" height="520" rx="30" fill="url(#grid)"/>
+  <circle cx="1015" cy="235" r="300" fill="url(#glow)"/>
+  <path d="M0 430H1280" stroke="#e11d48" stroke-opacity=".4"/>
+  <path d="M0 438H1280" stroke="#fff" stroke-opacity=".06"/>
+
+  <g transform="translate(95 83)">
+    <rect width="112" height="28" rx="14" fill="#e11d48" fill-opacity=".12" stroke="#e11d48" stroke-opacity=".42"/>
+    <circle cx="17" cy="14" r="4" fill="#e11d48"/>
+    <text x="30" y="18" fill="#fda4af" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2">SISTEMA ACTIVO</text>
+    <text x="0" y="105" fill="#fffdf8" font-family="Arial, sans-serif" font-size="60" font-weight="800" letter-spacing="1">ORDEN 66</text>
+    <text x="0" y="162" fill="#e11d48" font-family="Arial, sans-serif" font-size="60" font-weight="800" letter-spacing="1">VIANDAS</text>
+    <text x="2" y="210" fill="#b7b0a4" font-family="Arial, sans-serif" font-size="18">Pedidos diarios, cupos y operaciones bajo control.</text>
+    <g transform="translate(0 252)">
+      <rect width="138" height="38" rx="10" fill="#e11d48"/>
+      <text x="23" y="24" fill="#fff" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1">CREAR PEDIDO</text>
+      <rect x="150" width="138" height="38" rx="10" fill="none" stroke="#fff" stroke-opacity=".18"/>
+      <text x="177" y="24" fill="#d8d3ca" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1">VER MENÚS</text>
+    </g>
+  </g>
+
+  <g transform="translate(710 64)" filter="url(#shadow)">
+    <rect width="470" height="345" rx="24" fill="#f4f1e9"/>
+    <rect width="470" height="52" rx="24" fill="#fffdf8"/>
+    <path d="M0 52H470" stroke="#ded8cc"/>
+    <circle cx="30" cy="26" r="7" fill="#e11d48"/>
+    <rect x="52" y="18" width="96" height="8" rx="4" fill="#211f1a"/>
+    <rect x="52" y="31" width="64" height="5" rx="2.5" fill="#b8ae9e"/>
+    <rect x="372" y="15" width="70" height="22" rx="8" fill="#e11d48"/>
+
+    <text x="28" y="92" fill="#746d61" font-family="Arial, sans-serif" font-size="9" font-weight="700" letter-spacing="2">SELECCIÓN DEL DÍA</text>
+    <text x="28" y="120" fill="#211f1a" font-family="Arial, sans-serif" font-size="20" font-weight="700">¿Qué vas a pedir hoy?</text>
+
+    <g transform="translate(28 145)">
+      <rect width="196" height="132" rx="16" fill="#fffdf8" stroke="#ded8cc"/>
+      <rect width="58" height="132" rx="16" fill="#f3dfc5"/>
+      <circle cx="29" cy="52" r="18" fill="none" stroke="#e11d48" stroke-opacity=".55"/>
+      <circle cx="29" cy="52" r="6" fill="#e11d48"/>
+      <rect x="75" y="20" width="92" height="9" rx="4.5" fill="#211f1a"/>
+      <rect x="75" y="37" width="74" height="6" rx="3" fill="#b8ae9e"/>
+      <rect x="75" y="78" width="46" height="7" rx="3.5" fill="#211f1a"/>
+      <rect x="75" y="98" width="90" height="5" rx="2.5" fill="#eee9df"/>
+      <rect x="75" y="98" width="65" height="5" rx="2.5" fill="#22c55e"/>
+    </g>
+
+    <g transform="translate(240 145)">
+      <rect width="202" height="132" rx="16" fill="#fffdf8" stroke="#ded8cc"/>
+      <text x="18" y="27" fill="#746d61" font-family="Arial, sans-serif" font-size="8" font-weight="700" letter-spacing="2">PRÓXIMA ENTREGA</text>
+      <rect x="18" y="42" width="112" height="9" rx="4.5" fill="#211f1a"/>
+      <g transform="translate(18 67)">
+        <circle cx="8" cy="8" r="8" fill="#e11d48"/>
+        <path d="M7 8l2 2 4-5" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <path d="M16 8H64" stroke="#ded8cc"/>
+        <circle cx="72" cy="8" r="8" fill="#e11d48"/>
+        <path d="M71 8l2 2 4-5" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <path d="M80 8H128" stroke="#ded8cc"/>
+        <circle cx="136" cy="8" r="8" fill="#eee9df" stroke="#ded8cc"/>
+      </g>
+      <rect x="18" y="104" width="166" height="10" rx="5" fill="#eee9df"/>
+    </g>
+
+    <g transform="translate(28 297)">
+      <rect width="414" height="24" rx="8" fill="#fffdf8" stroke="#ded8cc"/>
+      <circle cx="15" cy="12" r="5" fill="#e11d48" fill-opacity=".16" stroke="#e11d48"/>
+      <rect x="29" y="8" width="112" height="7" rx="3.5" fill="#4f493f"/>
+      <rect x="342" y="8" width="50" height="7" rx="3.5" fill="#b8ae9e"/>
+    </g>
+  </g>
+
+  <g transform="translate(95 470)" fill="#817b72" font-family="Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2">
+    <text>REACT 19</text>
+    <text x="120">VITE 8</text>
+    <text x="215">TAILWIND 4</text>
+    <text x="355">MOTION</text>
+    <text x="455">AXIOS</text>
+    <text x="540">ZOD</text>
+  </g>
+</svg>
