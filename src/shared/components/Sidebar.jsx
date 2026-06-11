@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   ClipboardList, Gauge, LogOut, Plus, ShieldCheck,
-  UtensilsCrossed, X, UserCircle,
+  UtensilsCrossed, X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -16,7 +16,6 @@ const USER_SECTIONS = [
       { to: '/dashboard', icon: Gauge, label: 'Inicio', description: 'Resumen del día', code: '01' },
       { to: '/menus', icon: UtensilsCrossed, label: 'Elegir menú', description: 'Raciones y cupos', code: '02' },
       { to: '/pedidos', icon: ClipboardList, label: 'Mis pedidos', description: 'Estado e historial', code: '03' },
-      { to: '/perfil', icon: UserCircle, label: 'Mi perfil', description: 'Datos y seguridad', code: '04' },
     ],
   },
 ]
@@ -137,13 +136,19 @@ function SidebarContent({ onClose }) {
 
       <div className="sidebar-session">
         <div className="flex min-w-0 items-center gap-3">
-          <Link to="/perfil" onClick={onClose} className="sidebar-avatar shrink-0 hover:ring-2 hover:ring-sidebar-primary/40 transition-all">
-            {user?.nombre?.charAt(0)?.toUpperCase() ?? '?'}
+          <Link
+            to="/perfil"
+            onClick={onClose}
+            className="flex min-w-0 flex-1 items-center gap-3 rounded hover:bg-white/5 transition-colors -mx-1 px-1 py-0.5 group"
+          >
+            <span className="sidebar-avatar shrink-0 group-hover:ring-2 group-hover:ring-sidebar-primary/40 transition-all">
+              {user?.nombre?.charAt(0)?.toUpperCase() ?? '?'}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="truncate block text-sm font-medium text-[#F8FAFC]">{user?.nombre}</span>
+              <span className="technical-label mt-0.5 block">{isAdmin ? 'Administrador Imperial' : 'Operador autenticado'}</span>
+            </span>
           </Link>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium text-[#F8FAFC]">{user?.nombre}</div>
-            <div className="technical-label mt-0.5">{isAdmin ? 'Administrador Imperial' : 'Operador autenticado'}</div>
-          </div>
           <button type="button" onClick={handleLogout} className="sidebar-logout" aria-label="Cerrar sesión">
             <LogOut className="size-4" />
           </button>
