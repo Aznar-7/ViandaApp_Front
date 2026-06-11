@@ -9,8 +9,39 @@ const COLS = ['#', 'Usuario', 'Menú', 'Fecha', 'Turno', 'Cant.', 'Total', 'Esta
 
 export default function AdminTable({ pedidos, onRowUpdated }) {
   return (
-    <div className="admin-orders-table overflow-hidden rounded-xl border border-border bg-card">
-      <div className="overflow-x-auto">
+    <>
+      <div className="grid gap-3 md:hidden">
+        {pedidos.map((pedido) => (
+          <article key={pedido.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <span className="font-orbitron text-[9px] uppercase tracking-widest text-muted-foreground">Pedido #{pedido.id}</span>
+                <h3 className="mt-1 truncate font-semibold text-foreground">{pedido.menuNombre}</h3>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{pedido.usuarioNombre}</p>
+              </div>
+              <StatusBadge estado={pedido.estado} />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg bg-secondary/35 p-3 text-xs">
+              <div><span className="block text-muted-foreground">Fecha</span><strong className="text-foreground">{formatDate(pedido.fecha)}</strong></div>
+              <div><span className="block text-muted-foreground">Turno</span><strong className="capitalize text-foreground">{pedido.turnoEntrega}</strong></div>
+              <div><span className="block text-muted-foreground">Cantidad</span><strong className="text-foreground">×{pedido.cantidad}</strong></div>
+              <div><span className="block text-muted-foreground">Total</span><strong className="text-foreground">{formatCurrency(pedido.total)}</strong></div>
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
+              <StatusActions pedido={pedido} onSuccess={onRowUpdated} />
+              <Link
+                to={`/admin/pedidos/${pedido.id}/historial`}
+                className="flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/35 hover:text-primary"
+              >
+                <History className="size-3.5" /> Historial
+              </Link>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="admin-orders-table hidden overflow-hidden rounded-xl border border-border bg-card md:block">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-secondary/70">
@@ -80,7 +111,8 @@ export default function AdminTable({ pedidos, onRowUpdated }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

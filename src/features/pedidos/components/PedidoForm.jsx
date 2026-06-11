@@ -9,8 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/native-select'
+import { DateInput } from '@/components/ui/date-input'
 import { cn } from '@/lib/utils'
-import { formatCurrency, formatDate, todayISO } from '@/shared/utils'
+import AlertBanner from '@/shared/components/AlertBanner'
+import { formatCurrency, formatDate, getMenuImageUrl, todayISO } from '@/shared/utils'
 import menuService from '@/features/menus/services/menuService'
 import { TIPO_CONFIG } from '@/features/menus/constants'
 import { TURNO_OPTIONS } from '../constants'
@@ -103,13 +105,10 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
           <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
             Fecha de entrega
           </Label>
-          <Input
-            type="date"
+          <DateInput
             {...register('fecha')}
-            className={cn(
-              '[color-scheme:light]',
-              errors.fecha ? 'border-destructive' : 'border-border'
-            )}
+            aria-invalid={!!errors.fecha}
+            className={cn(errors.fecha && 'border-destructive')}
           />
           {errors.fecha && <FieldError msg={errors.fecha.message} />}
         </div>
@@ -152,6 +151,15 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
                       {...register('menuId')}
                       className="mt-0.5 accent-primary"
                     />
+                    {getMenuImageUrl(menu.imagenUrl) && (
+                      <img
+                        src={getMenuImageUrl(menu.imagenUrl)}
+                        alt=""
+                        className="h-12 w-12 shrink-0 rounded-lg border border-border object-cover"
+                        loading="lazy"
+                        onError={(event) => { event.currentTarget.hidden = true }}
+                      />
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-orbitron text-xs font-semibold text-foreground">{menu.nombre}</span>
@@ -258,9 +266,8 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         {error && (
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-            className="flex items-start gap-2 p-3 rounded bg-destructive/10 border border-destructive/30 text-destructive text-sm"
           >
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{error}
+            <AlertBanner variant="error" title="Revisá el pedido">{error}</AlertBanner>
           </motion.div>
         )}
       </AnimatePresence>

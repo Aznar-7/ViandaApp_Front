@@ -2,22 +2,22 @@ export const TIPO_CONFIG = {
   clasico: {
     label:  'Clásico',
     accent: 'bg-border',
-    badge:  'border-border/60 text-muted-foreground',
+    badge:  'border-stone-300 bg-white/90 text-stone-700',
   },
   vegetariano: {
     label:  'Vegetariano',
     accent: 'bg-emerald-500/60',
-    badge:  'border-emerald-500/40 text-emerald-400',
+    badge:  'border-emerald-200 bg-emerald-50/95 text-emerald-800',
   },
   vegano: {
     label:  'Vegano',
     accent: 'bg-teal-500/60',
-    badge:  'border-teal-500/40 text-teal-400',
+    badge:  'border-teal-200 bg-teal-50/95 text-teal-800',
   },
   sin_tacc: {
     label:  'Sin TACC',
     accent: 'bg-amber-500/60',
-    badge:  'border-amber-500/40 text-amber-400',
+    badge:  'border-amber-200 bg-amber-50/95 text-amber-800',
   },
 }
 

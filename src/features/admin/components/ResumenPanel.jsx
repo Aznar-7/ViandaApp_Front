@@ -1,4 +1,4 @@
-import { DollarSign, Clock, CheckCircle, Package } from 'lucide-react'
+import { DollarSign, Clock, CheckCircle, Package, XCircle } from 'lucide-react'
 import { formatCurrency } from '@/shared/utils'
 import { StatSkeleton } from '@/shared/components/Skeleton'
 import ResumenCard from './ResumenCard'
@@ -6,8 +6,8 @@ import ResumenCard from './ResumenCard'
 export default function ResumenPanel({ resumen, isLoading }) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => <StatSkeleton key={i} />)}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => <StatSkeleton key={i} />)}
       </div>
     )
   }
@@ -18,9 +18,10 @@ export default function ResumenPanel({ resumen, isLoading }) {
   const pendiente  = byEstado.pendiente
   const confirmado = byEstado.confirmado
   const entregado  = byEstado.entregado
+  const cancelado  = byEstado.cancelado
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
       <ResumenCard
         label="Recaudado"
         value={formatCurrency(resumen.recaudado ?? 0)}
@@ -48,6 +49,13 @@ export default function ResumenPanel({ resumen, isLoading }) {
         sub={entregado ? formatCurrency(entregado.totalMonto) : 'Sin pedidos'}
         icon={Package}
         variant="success"
+      />
+      <ResumenCard
+        label="Cancelados"
+        value={cancelado?.cantidad ?? 0}
+        sub={cancelado ? formatCurrency(cancelado.totalMonto) : 'Sin pedidos'}
+        icon={XCircle}
+        variant="danger"
       />
     </div>
   )

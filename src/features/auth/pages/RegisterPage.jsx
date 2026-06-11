@@ -29,7 +29,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden" style={{ backgroundColor: '#0B0D10' }}>
+    <div className="auth-shell flex min-h-screen w-full max-w-full flex-col overflow-x-clip lg:flex-row" style={{ backgroundColor: '#0B0D10' }}>
 
       {/* ── PANEL IZQUIERDO (header en mobile, columna en desktop) ── */}
       <div
@@ -128,7 +128,7 @@ export default function RegisterPage() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-col items-center justify-center flex-1 px-6 py-12 lg:py-0"
+        className="relative flex min-w-0 max-w-full flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:py-0"
         style={{ backgroundColor: '#0f1117' }}
       >
         {/* Luz ambiental sutil */}
@@ -140,7 +140,7 @@ export default function RegisterPage() {
             borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(225,29,72,0.06) 0%, transparent 70%)',
             filter: 'blur(80px)',
-            right: '-10%',
+            right: '-8rem',
             top: '50%',
             transform: 'translateY(-50%)',
           }}

@@ -1,52 +1,49 @@
 import { useState } from 'react'
-import { Loader2, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import pedidoService from '../services/pedidoService'
 
 export default function CancelButton({ pedidoId, onSuccess, size = 'default', className }) {
-  const [loading, setLoading]   = useState(false)
-  const [confirm, setConfirm]   = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
 
   async function handleCancel() {
-    if (!confirm) { setConfirm(true); return }
     setLoading(true)
     try {
       const updated = await pedidoService.cancelar(pedidoId)
-      toast.success('Pedido cancelado')
+      toast.success('Pedido cancelado', { description: `La orden #${pedidoId} quedó anulada.` })
       onSuccess?.(updated)
     } catch (err) {
-      toast.error(err.response?.data?.error ?? 'No se pudo cancelar el pedido')
+      toast.error('No se pudo cancelar el pedido', { description: err.response?.data?.error })
     } finally {
       setLoading(false)
-      setConfirm(false)
     }
   }
 
-  const small = size === 'sm'
-
   return (
-    <button
-      type="button"
-      onClick={handleCancel}
-      onBlur={() => setConfirm(false)}
-      disabled={loading}
-      className={cn(
-        'flex items-center gap-1 border rounded transition-all duration-150',
-        'font-orbitron tracking-widest uppercase',
-        small ? 'px-2 py-0.5 text-[9px]' : 'px-3 py-1.5 text-[10px]',
-        confirm
-          ? 'border-destructive/60 bg-destructive/15 text-destructive'
-          : 'border-border/60 text-muted-foreground hover:border-destructive/40 hover:text-destructive',
-        loading && 'opacity-60 cursor-not-allowed',
-        className
-      )}
-    >
-      {loading
-        ? <Loader2 className={cn('animate-spin', small ? 'w-2.5 h-2.5' : 'w-3 h-3')} />
-        : <X className={cn(small ? 'w-2.5 h-2.5' : 'w-3 h-3')} />
-      }
-      {confirm ? '¿Confirmar?' : 'Cancelar'}
-    </button>
+    <>
+      <Button
+        type="button"
+        variant="destructive"
+        size={size === 'sm' ? 'sm' : 'default'}
+        onClick={() => setOpen(true)}
+        className={cn('gap-1.5', className)}
+      >
+        <X className="size-3.5" /> Cancelar
+      </Button>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Cancelar este pedido?"
+        description="El pedido quedará anulado y esta acción no se puede deshacer."
+        confirmLabel="Cancelar pedido"
+        variant="destructive"
+        isLoading={loading}
+        onConfirm={handleCancel}
+      />
+    </>
   )
 }

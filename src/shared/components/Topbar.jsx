@@ -24,7 +24,7 @@ export default function Topbar({ onMenuClick, className }) {
 
   return (
     <header className={cn(
-      'app-topbar sticky top-0 z-30 h-14 backdrop-blur-xl flex items-center px-4 lg:px-6 gap-3',
+      'app-topbar sticky top-0 z-30 flex min-h-16 min-w-0 items-center gap-3 px-3 backdrop-blur-xl sm:px-4 lg:px-6',
       className
     )}>
       {/* Hamburger — mobile only */}
@@ -37,25 +37,23 @@ export default function Topbar({ onMenuClick, className }) {
       </button>
 
       {/* Brand — mobile only */}
-      <div className="lg:hidden flex items-center gap-2">
-        <Order66Mark className="!w-7 !h-7" />
-        <span className="font-orbitron text-[11px] font-bold tracking-[0.12em] uppercase text-foreground">
+      <div className="flex min-w-0 items-center gap-2 lg:hidden">
+        <Order66Mark className="!h-7 !w-7" />
+        <span className="hidden font-orbitron text-[11px] font-bold uppercase tracking-[0.12em] text-foreground sm:inline">
           Orden 66
         </span>
       </div>
 
-      <div className="hidden lg:flex items-center gap-3 min-w-0">
+      <div className="min-w-0 flex-1 lg:flex lg:items-center lg:gap-3">
         <div>
-          <div className="technical-label">{context.section}</div>
-          <div className="mt-1 truncate text-sm font-semibold text-foreground">{context.title}</div>
+          <div className="technical-label hidden sm:block">{context.section}</div>
+          <div className="truncate text-sm font-semibold text-foreground sm:mt-1">{context.title}</div>
         </div>
       </div>
 
-      <div className="flex-1" />
-
       {!isAdmin && !location.pathname.startsWith('/pedidos/nuevo') && (
-        <Link to="/pedidos/nuevo" className={cn(buttonVariants({ size: 'sm' }), 'hidden sm:inline-flex gap-1.5')}>
-          <Plus className="size-3.5" /> Nuevo pedido
+        <Link aria-label="Nuevo pedido" to="/pedidos/nuevo" className={cn(buttonVariants({ size: 'sm' }), 'gap-1.5')}>
+          <Plus className="size-3.5" /> <span className="hidden md:inline">Nuevo pedido</span>
         </Link>
       )}
 

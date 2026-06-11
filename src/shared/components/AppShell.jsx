@@ -6,9 +6,20 @@ import Topbar from './Topbar'
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem('sidebar:collapsed') === 'true'
+  )
+
+  function toggleSidebarCollapsed() {
+    setSidebarCollapsed((current) => {
+      const next = !current
+      localStorage.setItem('sidebar:collapsed', String(next))
+      return next
+    })
+  }
 
   return (
-    <div className="app-workspace min-h-screen flex">
+    <div className="app-workspace app-shell">
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -23,11 +34,16 @@ export default function AppShell() {
         )}
       </AnimatePresence>
 
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={toggleSidebarCollapsed}
+      />
 
-      <div className="flex flex-col flex-1 min-w-0">
+      <div className="app-shell__content">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 p-4 sm:p-6 lg:px-9 lg:py-8 max-w-[1480px] w-full mx-auto">
+        <main className="app-shell__main">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

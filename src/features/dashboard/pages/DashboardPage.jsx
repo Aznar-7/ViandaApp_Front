@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
@@ -9,7 +10,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
 import { useDashboard } from '../hooks/useDashboard'
 import { TIPO_CONFIG } from '@/features/menus/constants'
-import { formatDate, formatCurrency } from '@/shared/utils'
+import { formatDate, formatCurrency, getMenuImageUrl } from '@/shared/utils'
 import { CardSkeleton } from '@/shared/components/Skeleton'
 import StatusBadge from '@/features/pedidos/components/StatusBadge'
 import EmptyState from '@/shared/components/EmptyState'
@@ -42,15 +43,27 @@ function DashboardIntro({ user, today }) {
 }
 
 function MenuOfDayCard({ menu, featured = false }) {
+  const [imageFailed, setImageFailed] = useState(false)
   const type = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
   const available = menu.cupoDisponible ?? menu.cupoDiario
   const soldOut = available < 1
   const percent = menu.cupoDiario > 0 ? Math.max(0, Math.min(100, (available / menu.cupoDiario) * 100)) : 0
+  const imageUrl = getMenuImageUrl(menu.imagenUrl)
+  const hasImage = imageUrl && !imageFailed
 
   return (
     <article className={cn('daily-menu-card', featured && 'daily-menu-card--featured', soldOut && 'opacity-55')}>
-      <div className="daily-menu-card__visual">
-        <div className="daily-menu-card__plate">
+      <div className={cn('daily-menu-card__visual', hasImage && 'daily-menu-card__visual--image')}>
+        {hasImage && (
+          <img
+            src={imageUrl}
+            alt={menu.nombre}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        )}
+        <div className={cn('daily-menu-card__plate', hasImage && 'hidden')}>
           <UtensilsCrossed className="size-6" />
         </div>
         <span className={cn('daily-menu-card__type', type.badge)}>{type.label}</span>

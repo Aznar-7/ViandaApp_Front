@@ -1,78 +1,102 @@
 import { useState } from 'react'
-import { Loader2, CheckCircle2, PackageCheck, X } from 'lucide-react'
+import { CheckCircle2, PackageCheck, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import adminService from '../services/adminService'
 
 const ACTIONS = {
-  pendiente:  [
-    { key: 'confirmar', label: 'Confirmar', icon: CheckCircle2, call: adminService.confirmar,
-      className: 'border-sky-500/40 text-sky-400 hover:bg-sky-500/10' },
-    { key: 'cancelar', label: 'Cancelar',  icon: X,            call: adminService.cancelar,
-      className: 'border-destructive/40 text-destructive hover:bg-destructive/10', confirm: true },
+  pendiente: [
+    {
+      key: 'confirmar',
+      label: 'Confirmar',
+      icon: CheckCircle2,
+      call: adminService.confirmar,
+      variant: 'default',
+      description: 'El pedido pasará de pendiente a confirmado y quedará listo para preparar.',
+    },
+    {
+      key: 'cancelar',
+      label: 'Cancelar',
+      icon: X,
+      call: adminService.cancelar,
+      variant: 'destructive',
+      description: 'El pedido quedará cancelado y esta acción no se puede deshacer.',
+    },
   ],
   confirmado: [
-    { key: 'entregar', label: 'Entregar',  icon: PackageCheck,  call: adminService.entregar,
-      className: 'border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10' },
-    { key: 'cancelar', label: 'Cancelar',  icon: X,             call: adminService.cancelar,
-      className: 'border-destructive/40 text-destructive hover:bg-destructive/10', confirm: true },
+    {
+      key: 'entregar',
+      label: 'Entregar',
+      icon: PackageCheck,
+      call: adminService.entregar,
+      variant: 'default',
+      description: 'El pedido pasará a entregado y finalizará su recorrido operativo.',
+    },
+    {
+      key: 'cancelar',
+      label: 'Cancelar',
+      icon: X,
+      call: adminService.cancelar,
+      variant: 'destructive',
+      description: 'El pedido quedará cancelado y esta acción no se puede deshacer.',
+    },
   ],
 }
 
 export default function StatusActions({ pedido, onSuccess }) {
-  const [loading, setLoading]     = useState(null)
-  const [confirming, setConfirming] = useState(null)
-
+  const [loading, setLoading] = useState(false)
+  const [selected, setSelected] = useState(null)
   const actions = ACTIONS[pedido.estado]
+
   if (!actions) return <span className="text-xs text-muted-foreground">—</span>
 
-  async function handleAction(action) {
-    if (action.confirm && confirming !== action.key) {
-      setConfirming(action.key)
-      return
-    }
-    setLoading(action.key)
-    setConfirming(null)
+  async function handleAction() {
+    if (!selected) return
+    setLoading(true)
     try {
-      const updated = await action.call(pedido.id)
-      toast.success(`Pedido #${pedido.id} — ${action.label.toLowerCase()}`)
+      const updated = await selected.call(pedido.id)
+      toast.success(`Pedido #${pedido.id} actualizado`, { description: `Nuevo estado: ${selected.label.toLowerCase()}.` })
       onSuccess?.(updated)
     } catch (err) {
-      toast.error(err.response?.data?.error ?? 'No se pudo realizar la acción')
+      toast.error('No se pudo realizar la acción', { description: err.response?.data?.error })
     } finally {
-      setLoading(null)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="flex items-center gap-1.5">
-      {actions.map((action) => {
-        const Icon = action.icon
-        const isLoading   = loading === action.key
-        const isConfirming = confirming === action.key
-        return (
-          <button
-            key={action.key}
-            type="button"
-            disabled={!!loading}
-            onClick={() => handleAction(action)}
-            onBlur={() => { if (confirming === action.key) setConfirming(null) }}
-            className={cn(
-              'flex items-center gap-1 px-2 py-1 border rounded transition-all duration-150',
-              'font-orbitron text-[9px] tracking-wider uppercase',
-              action.className,
-              (isLoading || !!loading) && 'opacity-60 cursor-not-allowed',
-              isConfirming && 'animate-pulse'
-            )}
-          >
-            {isLoading
-              ? <Loader2 className="w-2.5 h-2.5 animate-spin" />
-              : <Icon className="w-2.5 h-2.5" />
-            }
-            {isConfirming ? '¿Sí?' : action.label}
-          </button>
-        )
-      })}
-    </div>
+    <>
+      <div className="flex items-center gap-1.5">
+        {actions.map((action) => {
+          const Icon = action.icon
+          return (
+            <Button
+              key={action.key}
+              type="button"
+              variant={action.variant}
+              size="sm"
+              onClick={() => setSelected(action)}
+              aria-label={`${action.label} pedido #${pedido.id}`}
+              title={action.label}
+              className="gap-1.5"
+            >
+              <Icon className="size-3.5" />
+              <span className="hidden xl:inline">{action.label}</span>
+            </Button>
+          )
+        })}
+      </div>
+      <ConfirmDialog
+        open={!!selected}
+        onOpenChange={(open) => { if (!open) setSelected(null) }}
+        title={`${selected?.label ?? 'Actualizar'} pedido #${pedido.id}`}
+        description={selected?.description}
+        confirmLabel={selected?.label}
+        variant={selected?.variant}
+        isLoading={loading}
+        onConfirm={handleAction}
+      />
+    </>
   )
 }

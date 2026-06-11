@@ -1,5 +1,6 @@
-import { CalendarDays, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { DateInput } from '@/components/ui/date-input'
 import { TIPOS_FILTER } from '../constants'
 
 export default function MenuFilters({ filters, onChange }) {
@@ -29,20 +30,13 @@ export default function MenuFilters({ filters, onChange }) {
         })}
       </div>
 
-      <div className="flex items-center gap-2 sm:ml-auto">
+      <div className="flex min-w-0 flex-col gap-2 sm:ml-auto sm:flex-row">
         {/* Date input */}
-        <div className="relative">
-          <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            type="date"
+        <div className="min-w-0 flex-1 sm:w-44">
+          <DateInput
             value={filters.fecha}
             onChange={(e) => onChange({ ...filters, fecha: e.target.value, page: 1 })}
-            className={cn(
-              'pl-8 pr-3 py-1.5 rounded-lg border border-border bg-secondary',
-              'text-foreground text-sm',
-              'focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20',
-              '[color-scheme:light]'
-            )}
+            aria-label="Filtrar por fecha"
           />
         </div>
 

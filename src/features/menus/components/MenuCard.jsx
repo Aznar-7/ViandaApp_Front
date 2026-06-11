@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { AlertTriangle, Ban, Leaf, ShoppingCart, Sprout, Utensils, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatDate, formatCurrency } from '@/shared/utils'
+import { formatDate, formatCurrency, getMenuImageUrl } from '@/shared/utils'
 import { TIPO_CONFIG } from '../constants'
 
 const TIPO_VISUAL = {
@@ -13,6 +14,7 @@ const TIPO_VISUAL = {
 }
 
 export default function MenuCard({ menu }) {
+  const [imageFailed, setImageFailed] = useState(false)
   const tipo = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
   const visual = TIPO_VISUAL[menu.tipo] ?? TIPO_VISUAL.clasico
   const { Icon } = visual
@@ -21,6 +23,8 @@ export default function MenuCard({ menu }) {
   const cupoPct = cupoTotal > 0 ? Math.round((cupoDisp / cupoTotal) * 100) : 0
   const isLow = cupoPct < 25 && cupoDisp > 0
   const isFull = cupoDisp === 0
+  const imageUrl = getMenuImageUrl(menu.imagenUrl)
+  const hasImage = imageUrl && !imageFailed
 
   return (
     <motion.article
@@ -28,21 +32,30 @@ export default function MenuCard({ menu }) {
       transition={{ duration: 0.14, ease: 'easeOut' }}
       className={cn('menu-catalog-card relative flex flex-col overflow-hidden', isFull && 'opacity-60')}
     >
-      <div className={cn('relative flex h-24 items-center justify-center border-b border-border/70', visual.visual)}>
-        <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle,currentColor_1px,transparent_1px)] [background-size:18px_18px]" />
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-current/15 bg-white/55">
+      <div className={cn('menu-card-visual relative flex h-32 items-center justify-center border-b border-border/70', visual.visual, hasImage && 'menu-card-visual--image')}>
+        {hasImage && (
+          <img
+            src={imageUrl}
+            alt={menu.nombre}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        )}
+        {!hasImage && <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle,currentColor_1px,transparent_1px)] [background-size:18px_18px]" />}
+        <div className={cn('relative h-12 w-12 items-center justify-center rounded-full border border-current/15 bg-white/55', hasImage ? 'hidden' : 'flex')}>
           <Icon className="h-6 w-6" />
         </div>
-        <span className={cn('absolute left-3 top-3 inline-flex items-center rounded-md border px-2 py-0.5 font-orbitron text-[8px] uppercase tracking-widest', tipo.badge)}>
+        <span className={cn('menu-type-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center rounded-full border px-2.5 py-1 font-orbitron text-[8px] font-semibold uppercase tracking-[0.14em] shadow-sm backdrop-blur-sm', tipo.badge)}>
           {tipo.label}
         </span>
         {isLow && !isFull && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-400/20 px-2 py-0.5 font-orbitron text-[8px] uppercase tracking-wider text-amber-600">
+          <span className="menu-availability-badge absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[10px] font-semibold text-amber-800 shadow-sm backdrop-blur-sm">
             <AlertTriangle className="h-2.5 w-2.5" />Últimas raciones
           </span>
         )}
         {isFull && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-red-400/50 bg-red-400/20 px-2 py-0.5 font-orbitron text-[8px] uppercase tracking-wider text-red-600">
+          <span className="menu-availability-badge absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-50/95 px-2.5 py-1 text-[10px] font-semibold text-red-700 shadow-sm backdrop-blur-sm">
             Agotado
           </span>
         )}
@@ -55,7 +68,7 @@ export default function MenuCard({ menu }) {
           <p className="mt-1.5 text-[11px] text-muted-foreground/75">{formatDate(menu.fecha)}</p>
         </div>
 
-        <div className="flex items-end justify-between">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="mb-0.5 text-[10px] text-muted-foreground">Precio unitario</p>
             <p className="font-orbitron text-xl font-bold tracking-wide text-foreground">{formatCurrency(menu.precio)}</p>

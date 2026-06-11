@@ -38,7 +38,8 @@ const Toaster = ({
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: "cn-toast !border-border !shadow-xl",
+          description: "!text-muted-foreground",
         },
       }}
       {...props} />

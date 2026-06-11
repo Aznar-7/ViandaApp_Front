@@ -37,6 +37,14 @@ const VARIANTS = {
     sub:     'text-muted-foreground',
     bar:     'bg-[#22C55E]',
   },
+  danger: {
+    border:  'border-red-200',
+    bg:      'bg-red-50/60',
+    label:   'text-muted-foreground',
+    value:   'text-red-700',
+    sub:     'text-muted-foreground',
+    bar:     'bg-red-500',
+  },
 }
 
 export default function ResumenCard({ label, value, sub, icon: Icon, variant = 'default', className }) {

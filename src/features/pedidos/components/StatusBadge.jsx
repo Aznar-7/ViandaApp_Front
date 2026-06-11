@@ -5,28 +5,28 @@ const CONFIG = {
   pendiente:  {
     label: 'Pendiente',
     icon: Hourglass,
-    dot: 'bg-[#FACC15]', text: 'text-[#FACC15]', bg: 'bg-[#FACC15]/10', border: 'border-[#FACC15]/25',
+    dot: 'bg-amber-500', text: 'text-amber-800', bg: 'bg-amber-50', border: 'border-amber-200',
     leftBorder: 'border-l-[#FACC15]',
     pulse: true,
   },
   confirmado: {
     label: 'Confirmado',
     icon: ShieldCheck,
-    dot: 'bg-[#38BDF8]', text: 'text-[#38BDF8]', bg: 'bg-[#38BDF8]/10', border: 'border-[#38BDF8]/25',
+    dot: 'bg-sky-500', text: 'text-sky-800', bg: 'bg-sky-50', border: 'border-sky-200',
     leftBorder: 'border-l-[#38BDF8]',
     pulse: false,
   },
   entregado:  {
     label: 'Entregado',
     icon: PackageCheck,
-    dot: 'bg-[#22C55E]', text: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10', border: 'border-[#22C55E]/25',
+    dot: 'bg-emerald-500', text: 'text-emerald-800', bg: 'bg-emerald-50', border: 'border-emerald-200',
     leftBorder: 'border-l-[#22C55E]',
     pulse: false,
   },
   cancelado:  {
     label: 'Anulado',
     icon: Ban,
-    dot: 'bg-[#EF4444]', text: 'text-[#EF4444]', bg: 'bg-[#EF4444]/10', border: 'border-[#EF4444]/25',
+    dot: 'bg-red-500', text: 'text-red-800', bg: 'bg-red-50', border: 'border-red-200',
     leftBorder: 'border-l-[#EF4444]',
     pulse: false,
   },
@@ -38,8 +38,8 @@ export default function StatusBadge({ estado, className }) {
 
   return (
     <span className={cn(
-      'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border',
-      'font-orbitron text-[9px] tracking-widest uppercase whitespace-nowrap',
+      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 shadow-sm',
+      'text-[10px] font-bold uppercase tracking-wide whitespace-nowrap',
       cfg.bg, cfg.border, cfg.text,
       className
     )}>

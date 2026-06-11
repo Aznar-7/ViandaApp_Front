@@ -11,11 +11,16 @@ export default function App() {
         <AuthProvider>
           <AppRouter />
           <Toaster
-            theme="dark"
-            position="bottom-right"
+            theme="light"
+            position="top-right"
+            richColors
+            closeButton
+            visibleToasts={4}
             toastOptions={{
               classNames: {
+                toast: 'cn-toast !border-border !shadow-xl',
                 title: 'font-orbitron text-xs tracking-wider',
+                description: '!text-muted-foreground',
               },
             }}
           />

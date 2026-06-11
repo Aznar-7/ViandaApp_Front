@@ -1,6 +1,7 @@
-import { CalendarDays, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ESTADOS_FILTER } from '../constants'
+import { DateInput } from '@/components/ui/date-input'
 
 const ESTADO_ACTIVE = {
   '':          'bg-[#E11D48]/10 border-[#E11D48]/40 text-[#E11D48]',
@@ -37,20 +38,13 @@ export default function PedidoFilters({ filters, onChange }) {
         })}
       </div>
 
-      <div className="flex items-center gap-2 sm:ml-auto">
+      <div className="flex min-w-0 flex-col gap-2 sm:ml-auto sm:flex-row">
         {/* Date */}
-        <div className="relative">
-          <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            type="date"
+        <div className="min-w-0 flex-1 sm:w-44">
+          <DateInput
             value={filters.fecha ?? ''}
             onChange={(e) => onChange({ ...filters, fecha: e.target.value, page: 1 })}
-            className={cn(
-              'pl-8 pr-3 py-1.5 rounded-lg border border-border bg-secondary',
-              'text-foreground text-sm',
-              'focus:outline-none focus:ring-2 focus:ring-[#E11D48]/30 focus:border-[#E11D48]/50',
-              '[color-scheme:light]'
-            )}
+            aria-label="Filtrar por fecha"
           />
         </div>
 

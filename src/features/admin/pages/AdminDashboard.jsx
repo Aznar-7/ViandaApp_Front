@@ -12,11 +12,16 @@ import Pagination from '@/shared/components/Pagination'
 import CommandHeader from '@/shared/components/CommandHeader'
 
 export default function AdminDashboard() {
-  const { resumen, isLoading: loadingResumen } = useResumen()
+  const { resumen, isLoading: loadingResumen, error: resumenError, refetch: refetchResumen } = useResumen()
   const { pedidos, total, page, limit, isLoading, error, filters, setFilters, refetch, updateRow } = useAdminPedidos()
 
   const totalPages = Math.ceil(total / limit)
   const hasFilters = filters.estado !== '' || !!filters.fecha
+
+  function handleRowUpdated(updated) {
+    updateRow(updated)
+    refetchResumen()
+  }
 
   return (
     <motion.div className="admin-workspace" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
@@ -30,6 +35,7 @@ export default function AdminDashboard() {
 
       {/* Stat cards */}
       <div className="mb-7">
+        {resumenError && <ErrorMessage message={resumenError} onRetry={refetchResumen} />}
         <ResumenPanel resumen={resumen} isLoading={loadingResumen} />
       </div>
 
@@ -66,7 +72,7 @@ export default function AdminDashboard() {
 
       {!error && !isLoading && pedidos.length > 0 && (
         <>
-          <AdminTable pedidos={pedidos} onRowUpdated={updateRow} />
+          <AdminTable pedidos={pedidos} onRowUpdated={handleRowUpdated} />
           <Pagination
             page={page}
             totalPages={totalPages}
