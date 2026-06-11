@@ -1,28 +1,36 @@
 import { motion } from 'motion/react'
-import { ArrowRight } from 'lucide-react'
+import { BookOpen, CheckCircle2, ShoppingBag } from 'lucide-react'
 
 const STEPS = [
   {
     number: '01',
-    title: 'Explorá el menú',
-    description: 'Revisá las raciones disponibles para cada día y turno.',
+    icon: BookOpen,
+    title: 'Mirá el menú del día',
+    description:
+      'Entrás a la app y ves qué hay disponible: tipo de comida, cupos restantes y precio. Todo antes de decidir.',
   },
   {
     number: '02',
-    title: 'Hacé tu pedido',
+    icon: CheckCircle2,
+    title: 'Confirmá tu pedido',
     description:
-      'Elegí tu menú, cantidad y punto de retiro. Todo en menos de un minuto.',
+      'Un tap y tu vianda queda reservada. Sin filas, sin llamadas. Recibís confirmación al instante.',
   },
   {
     number: '03',
-    title: 'Retirá tu ración',
-    description: 'Llegá a la cantina. Tu pedido ya está listo y esperándote.',
+    icon: ShoppingBag,
+    title: 'Retirá en la cantina',
+    description:
+      'Llegás y ya está listo. Solo mostrás el estado de tu pedido y te vas. Sin esperar.',
   },
 ]
 
 export default function HowItWorksSection() {
   return (
-    <section className="bg-secondary/30 px-6 py-24">
+    <section className="relative bg-background px-6 py-24">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
       <div className="mx-auto max-w-5xl">
         <motion.div
           className="mb-16 flex flex-col items-center gap-3 text-center"
@@ -32,42 +40,52 @@ export default function HowItWorksSection() {
           transition={{ duration: 0.5 }}
         >
           <span className="font-orbitron text-xs tracking-[0.3em] uppercase text-primary">
-            Protocolo
+            Cómo funciona
           </span>
           <h2 className="font-orbitron text-2xl font-bold text-foreground sm:text-3xl">
-            El protocolo imperial
+            En tres pasos
           </h2>
         </motion.div>
 
-        <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:gap-0">
+        <div className="relative flex flex-col gap-12 sm:flex-row sm:gap-0">
+          {/* Connecting line — desktop */}
+          <div
+            className="pointer-events-none absolute top-6 left-0 right-0 hidden h-px sm:block"
+            style={{
+              background:
+                'linear-gradient(to right, transparent 5%, rgba(225,29,72,0.25) 20%, rgba(225,29,72,0.25) 80%, transparent 95%)',
+            }}
+          />
+
           {STEPS.map((step, i) => (
-            <div key={step.number} className="flex flex-1 flex-row sm:flex-col">
-              <motion.div
-                className="flex flex-1 flex-col gap-3"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.14, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            <motion.div
+              key={step.number}
+              className="relative flex flex-1 flex-row gap-5 sm:flex-col sm:items-center sm:px-6 sm:text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Icon circle */}
+              <div
+                className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-card shadow-lg shadow-black/20"
+                style={{ boxShadow: '0 0 20px rgba(225,29,72,0.12)' }}
               >
-                <span className="font-orbitron text-5xl font-black leading-none text-primary/20">
+                <step.icon className="h-5 w-5 text-primary" />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <span className="font-orbitron text-3xl font-black leading-none text-primary/15">
                   {step.number}
                 </span>
-                <div className="flex flex-col gap-1.5 sm:pr-6">
-                  <h3 className="font-orbitron text-sm font-bold text-foreground">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.div>
-
-              {i < STEPS.length - 1 && (
-                <div className="hidden items-center justify-end pt-5 sm:flex" style={{ width: '2.5rem' }}>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-border" />
-                </div>
-              )}
-            </div>
+                <h3 className="font-orbitron text-sm font-bold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted-foreground sm:max-w-[14rem]">
+                  {step.description}
+                </p>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
