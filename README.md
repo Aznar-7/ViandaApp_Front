@@ -67,16 +67,15 @@ El diseño combina una navegación oscura inspirada en un centro de comando con 
 ```text
 src/
 ├── components/ui/          # Primitivas visuales reutilizables
-├── context/                # Sesión y autenticación
 ├── features/
 │   ├── landing/            # Presentación pública
-│   ├── auth/               # Login y registro
+│   ├── auth/               # Login, registro y contexto de sesión
 │   ├── dashboard/          # Inicio del usuario
 │   ├── menus/              # Catálogo y cupos
 │   ├── pedidos/            # Flujo completo de órdenes
 │   ├── perfil/             # Cuenta y preferencias
 │   └── admin/              # Operaciones administrativas
-├── lib/                    # Axios, errores y utilidades
+├── lib/                    # Axios, useFetch y utilidades
 ├── router/                 # Rutas públicas y protegidas
 └── shared/                 # Shell, navegación y feedback
 ```
@@ -116,10 +115,13 @@ La aplicación queda disponible por defecto en `http://localhost:5173`.
 ## Comandos
 
 ```bash
-npm run dev       # servidor de desarrollo
-npm run build     # build optimizado de producción
-npm run preview   # previsualizar el build
-npm run lint      # validar calidad del código
+npm run dev         # servidor de desarrollo
+npm run build       # build optimizado de producción
+npm run preview     # previsualizar el build
+npm run lint        # validar calidad del código
+npm run test:run    # ejecutar suite de tests (CI)
+npm run test        # tests en modo watch
+npm run format      # formatear código con Prettier
 ```
 
 ## Rutas principales
@@ -136,9 +138,9 @@ npm run lint      # validar calidad del código
 
 ## API y diseño
 
-- El contrato consumido por el frontend está documentado en [FRONTEND_API.md](./FRONTEND_API.md).
-- Las decisiones visuales y de UX viven en [ORDEN66_UI_GUIDELINES.md](./ORDEN66_UI_GUIDELINES.md).
-- Las mejoras futuras y deuda conocida están registradas en [PLAN_MEJORAS.md](./PLAN_MEJORAS.md).
+- El contrato consumido por el frontend está documentado en [FRONTEND_API.md](./docs/FRONTEND_API.md).
+- Las decisiones visuales y de UX viven en [ORDEN66_UI_GUIDELINES.md](./docs/ORDEN66_UI_GUIDELINES.md).
+- Las mejoras futuras y deuda conocida están registradas en [PLAN_MEJORAS.md](./docs/PLAN_MEJORAS.md).
 
 ## Identidad visual
 
