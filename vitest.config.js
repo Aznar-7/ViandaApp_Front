@@ -1,15 +1,14 @@
-import { defineConfig } from 'vite'
-import react, { reactCompilerPreset } from '@vitejs/plugin-react'
-import babel from '@rolldown/plugin-babel'
-import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    react(),
-    babel({ presets: [reactCompilerPreset()] }),
-  ],
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.js'],
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

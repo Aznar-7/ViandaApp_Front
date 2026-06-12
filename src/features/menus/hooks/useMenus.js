@@ -8,30 +8,34 @@ export function useMenus() {
   const [error, setError] = useState(null)
   const [filters, setFilters] = useState({ tipo: '', fecha: '', page: 1, limit: PAGE_SIZES.menus })
 
+  // Re-fetch when tipo/fecha change — server filters reduce the payload
   useEffect(() => {
+    let cancelled = false
     setIsLoading(true)
     setError(null)
-    menuService
-      .getMenus()
-      .then(setAllMenus)
-      .catch((err) => setError(err.response?.data?.message ?? 'Error al cargar los menús'))
-      .finally(() => setIsLoading(false))
-  }, [])
+    const params = {}
+    if (filters.tipo)  params.tipo  = filters.tipo
+    if (filters.fecha) params.fecha = filters.fecha
 
-  const filteredMenus = useMemo(() => {
-    return allMenus.filter((m) => {
-      if (!m.activo) return false
-      if (filters.tipo && m.tipo !== filters.tipo) return false
-      if (filters.fecha && m.fecha !== filters.fecha) return false
-      return true
-    })
-  }, [allMenus, filters])
+    menuService.getMenus(params)
+      .then((data) => { if (!cancelled) setAllMenus(data ?? []) })
+      .catch((err) => { if (!cancelled) setError(err.response?.data?.message ?? 'Error al cargar los menús') })
+      .finally(() => { if (!cancelled) setIsLoading(false) })
 
-  const total = filteredMenus.length
+    return () => { cancelled = true }
+  }, [filters.tipo, filters.fecha])
+
+  // Client-side active guard + pagination (API may return inactive menus)
+  const filteredMenus = useMemo(
+    () => allMenus.filter((m) => m.activo),
+    [allMenus]
+  )
+
+  const total      = filteredMenus.length
   const totalPages = Math.max(1, Math.ceil(total / filters.limit))
-  const page = Math.min(filters.page, totalPages)
-  const start = (page - 1) * filters.limit
-  const menus = filteredMenus.slice(start, start + filters.limit)
+  const page       = Math.min(filters.page, totalPages)
+  const start      = (page - 1) * filters.limit
+  const menus      = filteredMenus.slice(start, start + filters.limit)
 
   return { menus, allMenus, total, totalPages, page, isLoading, error, filters, setFilters }
 }

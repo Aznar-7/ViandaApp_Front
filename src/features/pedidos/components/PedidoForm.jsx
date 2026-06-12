@@ -1,7 +1,3 @@
-import { useEffect, useState, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { motion, AnimatePresence } from 'motion/react'
 import { Loader2, AlertCircle, MapPin, StickyNote, UtensilsCrossed, Calendar, Lock } from 'lucide-react'
 import { Label } from '@/components/ui/label'
@@ -12,76 +8,19 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { DateInput } from '@/components/ui/date-input'
 import { cn } from '@/lib/utils'
 import AlertBanner from '@/shared/components/AlertBanner'
-import { formatCurrency, formatDate, getMenuImageUrl, todayISO } from '@/shared/utils'
-import menuService from '@/features/menus/services/menuService'
+import { formatCurrency, formatDate } from '@/shared/utils'
 import { TIPO_CONFIG } from '@/features/menus/constants'
 import { TURNO_OPTIONS } from '../constants'
+import { usePedidoForm } from '../hooks/usePedidoForm'
 
-const createSchema = z.object({
-  menuId:        z.coerce.number().min(1, 'Seleccione un menú'),
-  fecha:         z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
-  cantidad:      z.coerce.number().min(1, 'Mínimo 1').max(10, 'Máximo 10'),
-  turnoEntrega:  z.enum(['almuerzo', 'cena'], { required_error: 'Seleccione un turno' }),
-  puntoRetiro:   z.string().min(2, 'Mínimo 2 caracteres').max(200),
-  observaciones: z.string().max(500).optional(),
-})
-
-const editSchema = z.object({
-  cantidad:      z.coerce.number().min(1, 'Mínimo 1').max(10, 'Máximo 10'),
-  turnoEntrega:  z.enum(['almuerzo', 'cena'], { required_error: 'Seleccione un turno' }),
-  puntoRetiro:   z.string().min(2, 'Mínimo 2 caracteres').max(200),
-  observaciones: z.string().max(500).optional(),
-})
-
-// pedidoInfo: { menuNombre, fecha } — passed when isEdit=true
 export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, onSubmit, isLoading, error }) {
-  const [menus, setMenus]               = useState([])
-  const [loadingMenus, setLoadingMenus] = useState(!isEdit)
-
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
-    resolver: zodResolver(isEdit ? editSchema : createSchema),
-    defaultValues: isEdit
-      ? {
-          cantidad:      defaultValues?.cantidad      ?? 1,
-          turnoEntrega:  defaultValues?.turnoEntrega  ?? '',
-          puntoRetiro:   defaultValues?.puntoRetiro   ?? '',
-          observaciones: defaultValues?.observaciones ?? '',
-        }
-      : {
-          menuId:        defaultValues?.menuId        ?? '',
-          fecha:         defaultValues?.fecha         ?? todayISO(),
-          cantidad:      defaultValues?.cantidad      ?? 1,
-          turnoEntrega:  defaultValues?.turnoEntrega  ?? '',
-          puntoRetiro:   defaultValues?.puntoRetiro   ?? '',
-          observaciones: defaultValues?.observaciones ?? '',
-        },
-  })
-
-  const watchFecha    = watch('fecha')
-  const watchMenuId   = watch('menuId')
-  const watchCantidad = watch('cantidad')
-
-  useEffect(() => {
-    if (isEdit || !watchFecha) return
-    setLoadingMenus(true)
-    menuService.getMenus({ fecha: watchFecha, activo: 1 })
-      .then(setMenus)
-      .catch(() => setMenus([]))
-      .finally(() => setLoadingMenus(false))
-  }, [isEdit, watchFecha])
-
-  const selectedMenu = useMemo(
-    () => menus.find((m) => String(m.id) === String(watchMenuId)) ?? null,
-    [menus, watchMenuId]
-  )
-
-  const total = selectedMenu ? selectedMenu.precio * (watchCantidad || 0) : 0
-  const canSubmit = isEdit || menus.length > 0
+  const { form, menus, loadingMenus, selectedMenu, total, canSubmit } = usePedidoForm({ defaultValues, isEdit })
+  const { register, handleSubmit, watch, formState: { errors } } = form
+  const watchMenuId = watch('menuId')
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-[0_20px_55px_-44px_rgba(57,48,35,0.8)] sm:p-6">
 
-      {/* Edit mode: read-only menu + date header */}
       {isEdit && pedidoInfo && (
         <div className="flex items-center gap-3 p-3 rounded border border-border/60 bg-secondary/20">
           <Lock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -99,7 +38,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         </div>
       )}
 
-      {/* Create mode: date picker */}
       {!isEdit && (
         <div className="space-y-1.5">
           <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
@@ -114,7 +52,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         </div>
       )}
 
-      {/* Create mode: menu selector */}
       {!isEdit && (
         <div className="space-y-1.5">
           <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
@@ -151,13 +88,13 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
                       {...register('menuId')}
                       className="mt-0.5 accent-primary"
                     />
-                    {getMenuImageUrl(menu.imagenUrl) && (
+                    {menu.imagenUrl && (
                       <img
-                        src={getMenuImageUrl(menu.imagenUrl)}
+                        src={menu.imagenUrl}
                         alt=""
                         className="h-12 w-12 shrink-0 rounded-lg border border-border object-cover"
                         loading="lazy"
-                        onError={(event) => { event.currentTarget.hidden = true }}
+                        onError={(e) => { e.currentTarget.hidden = true }}
                       />
                     )}
                     <div className="flex-1 min-w-0">
@@ -186,7 +123,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         </div>
       )}
 
-      {/* Cantidad + Turno */}
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
@@ -217,7 +153,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         </div>
       </div>
 
-      {/* Punto de retiro */}
       <div className="space-y-1.5">
         <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
           <MapPin className="inline w-3 h-3 mr-1" />Punto de retiro
@@ -230,7 +165,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         {errors.puntoRetiro && <FieldError msg={errors.puntoRetiro.message} />}
       </div>
 
-      {/* Observaciones */}
       <div className="space-y-1.5">
         <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
           <StickyNote className="inline w-3 h-3 mr-1" />Observaciones (opcional)
@@ -243,7 +177,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         />
       </div>
 
-      {/* Total preview — create mode only */}
       {!isEdit && selectedMenu && (
         <div className="grid grid-cols-2 gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
           <div>
@@ -261,7 +194,6 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         </div>
       )}
 
-      {/* Server error */}
       <AnimatePresence>
         {error && (
           <motion.div

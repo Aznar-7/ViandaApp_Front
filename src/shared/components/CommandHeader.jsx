@@ -2,6 +2,10 @@ import { motion } from 'motion/react'
 import { Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/**
+ * Page-level header with imperial HUD aesthetic.
+ * @param {{ eyebrow: string, title: string, description?: string, code?: string, action?: React.ReactNode, back?: React.ReactNode, className?: string }} props
+ */
 export default function CommandHeader({
   eyebrow,
   title,

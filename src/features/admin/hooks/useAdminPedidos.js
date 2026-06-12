@@ -7,24 +7,26 @@ export function useAdminPedidos(initialFilters = {}) {
   const [filters, setFilters] = useState({ page: 1, limit: PAGE_SIZES.adminPedidos, ...initialFilters })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError]         = useState(null)
+  const [tick, setTick]           = useState(0)
 
-  const fetch = useCallback(() => {
+  useEffect(() => {
+    let cancelled = false
     setIsLoading(true)
     setError(null)
     const params = { page: filters.page, limit: filters.limit }
     if (filters.estado) params.estado = filters.estado
     if (filters.fecha)  params.fecha  = filters.fecha
 
-    adminService
-      .getPedidos(params)
-      .then(setData)
-      .catch((err) => setError(err.response?.data?.error ?? 'Error al cargar pedidos'))
-      .finally(() => setIsLoading(false))
-  }, [filters])
+    adminService.getPedidos(params)
+      .then((d) => { if (!cancelled) setData(d) })
+      .catch((err) => { if (!cancelled) setError(err.response?.data?.error ?? 'Error al cargar pedidos') })
+      .finally(() => { if (!cancelled) setIsLoading(false) })
 
-  useEffect(() => { fetch() }, [fetch])
+    return () => { cancelled = true }
+  }, [filters, tick])
 
-  // In-place update after a state change action
+  const refetch = useCallback(() => setTick((t) => t + 1), [])
+
   const updateRow = useCallback((updated) => {
     setData((prev) => ({
       ...prev,
@@ -32,5 +34,5 @@ export function useAdminPedidos(initialFilters = {}) {
     }))
   }, [])
 
-  return { ...data, isLoading, error, filters, setFilters, refetch: fetch, updateRow }
+  return { ...data, isLoading, error, filters, setFilters, refetch, updateRow }
 }

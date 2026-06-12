@@ -7,8 +7,10 @@ export function usePedidos(initialFilters = {}) {
   const [filters, setFilters] = useState({ page: 1, limit: PAGE_SIZES.pedidos, ...initialFilters })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError]         = useState(null)
+  const [tick, setTick]           = useState(0)
 
-  const fetch = useCallback(() => {
+  useEffect(() => {
+    let cancelled = false
     setIsLoading(true)
     setError(null)
     const params = {}
@@ -17,14 +19,15 @@ export function usePedidos(initialFilters = {}) {
     params.page  = filters.page
     params.limit = filters.limit
 
-    pedidoService
-      .getPedidos(params)
-      .then(setData)
-      .catch((err) => setError(err.response?.data?.error ?? 'Error al cargar pedidos'))
-      .finally(() => setIsLoading(false))
-  }, [filters])
+    pedidoService.getPedidos(params)
+      .then((d) => { if (!cancelled) setData(d) })
+      .catch((err) => { if (!cancelled) setError(err.response?.data?.error ?? 'Error al cargar pedidos') })
+      .finally(() => { if (!cancelled) setIsLoading(false) })
 
-  useEffect(() => { fetch() }, [fetch])
+    return () => { cancelled = true }
+  }, [filters, tick])
 
-  return { ...data, isLoading, error, filters, setFilters, refetch: fetch }
+  const refetch = useCallback(() => setTick((t) => t + 1), [])
+
+  return { ...data, isLoading, error, filters, setFilters, refetch }
 }

@@ -1,6 +1,9 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/**
+ * @param {{ page: number, totalPages: number, onChange: (page: number) => void, className?: string }} props
+ */
 export default function Pagination({ page, totalPages, onChange, className }) {
   if (!totalPages || totalPages <= 1) return null
 

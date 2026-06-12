@@ -20,6 +20,9 @@ const VARIANTS = {
   },
 }
 
+/**
+ * @param {{ variant?: 'pedidos'|'menus'|'error', icon?: React.ComponentType, title?: string, description?: string, action?: () => void, actionLabel?: string, className?: string }} props
+ */
 export default function EmptyState({
   variant,
   icon: IconProp,

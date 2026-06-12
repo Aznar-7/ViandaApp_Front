@@ -1,6 +1,10 @@
 import axios from 'axios'
 import { toast } from 'sonner'
 
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+  throw new Error('[viandas] VITE_API_URL no definida. El build de producción requiere esta variable de entorno.')
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
   headers: { 'Content-Type': 'application/json' },
