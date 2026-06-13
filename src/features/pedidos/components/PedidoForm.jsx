@@ -88,7 +88,7 @@ export default function PedidoForm({
               {formatDate(pedidoInfo.fecha)}
             </span>
             <p className="text-[10px] mt-0.5 font-orbitron tracking-wider uppercase opacity-60">
-              Menú y fecha no editables
+              La fecha no es editable. El menú puede cambiarse por otro activo de la misma fecha.
             </p>
           </div>
         </div>
@@ -108,97 +108,95 @@ export default function PedidoForm({
         </div>
       )}
 
-      {!isEdit && (
-        <div className="space-y-1.5">
-          <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
-            Menú
-          </Label>
-          {loadingMenus ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              Cargando menús...
-            </div>
-          ) : menusError ? (
-            <AlertBanner variant="error" title="No se pudieron cargar los menús">
-              {menusError}
-            </AlertBanner>
-          ) : menus.length === 0 ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-              <UtensilsCrossed className="w-3.5 h-3.5" />
-              Sin menús disponibles para esta fecha
-            </div>
-          ) : (
-            <div className="grid gap-2">
-              {menus.map((menu) => {
-                const tipo = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
-                const disabled = menu.cupoDisponible < 1
-                const selected = String(menu.id) === String(watchMenuId)
-                const thumbUrl = getMenuImageUrl(menu.imagenUrl)
-                return (
-                  <label
-                    key={menu.id}
-                    className={cn(
-                      'relative flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-colors duration-150',
-                      disabled && 'opacity-50 cursor-not-allowed',
-                      selected && !disabled && 'border-primary/50 bg-primary/5',
-                      !selected && !disabled && 'border-border hover:border-border/80'
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      className="mt-0.5 accent-primary"
-                      disabled={disabled}
-                      {...register('menuId')}
-                      value={menu.id}
-                      checked={selected}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
+          Menú
+        </Label>
+        {loadingMenus ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            Cargando menús...
+          </div>
+        ) : menusError ? (
+          <AlertBanner variant="error" title="No se pudieron cargar los menús">
+            {menusError}
+          </AlertBanner>
+        ) : menus.length === 0 ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+            <UtensilsCrossed className="w-3.5 h-3.5" />
+            Sin menús disponibles para esta fecha
+          </div>
+        ) : (
+          <div className="grid gap-2">
+            {menus.map((menu) => {
+              const tipo = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
+              const selected = String(menu.id) === String(watchMenuId)
+              const disabled = menu.cupoDisponible < 1 && !(isEdit && selected)
+              const thumbUrl = getMenuImageUrl(menu.imagenUrl)
+              return (
+                <label
+                  key={menu.id}
+                  className={cn(
+                    'relative flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-colors duration-150',
+                    disabled && 'opacity-50 cursor-not-allowed',
+                    selected && !disabled && 'border-primary/50 bg-primary/5',
+                    !selected && !disabled && 'border-border hover:border-border/80'
+                  )}
+                >
+                  <input
+                    type="radio"
+                    className="mt-0.5 accent-primary"
+                    disabled={disabled}
+                    {...register('menuId')}
+                    value={menu.id}
+                    checked={selected}
+                  />
+                  {thumbUrl ? (
+                    <img
+                      src={thumbUrl}
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded-lg border border-border object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
                     />
-                    {thumbUrl ? (
-                      <img
-                        src={thumbUrl}
-                        alt=""
-                        className="h-12 w-12 shrink-0 rounded-lg border border-border object-cover"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/50">
-                        <UtensilsCrossed className="size-4 text-muted-foreground/40" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-orbitron text-xs font-semibold text-foreground">
-                          {menu.nombre}
-                        </span>
-                        <span
-                          className={cn(
-                            'text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px',
-                            tipo.badge
-                          )}
-                        >
-                          {tipo.label}
-                        </span>
-                        {disabled && (
-                          <span className="text-[9px] font-orbitron tracking-wider uppercase border border-destructive/30 text-destructive rounded px-1.5 py-px">
-                            Sin cupo
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span>{formatCurrency(menu.precio)} / unidad</span>
-                        <span>Cupo: {menu.cupoDisponible ?? menu.cupoDiario} restantes</span>
-                      </div>
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/50">
+                      <UtensilsCrossed className="size-4 text-muted-foreground/40" />
                     </div>
-                  </label>
-                )
-              })}
-            </div>
-          )}
-          {errors.menuId && <FieldError msg={errors.menuId.message} />}
-        </div>
-      )}
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-orbitron text-xs font-semibold text-foreground">
+                        {menu.nombre}
+                      </span>
+                      <span
+                        className={cn(
+                          'text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px',
+                          tipo.badge
+                        )}
+                      >
+                        {tipo.label}
+                      </span>
+                      {disabled && (
+                        <span className="text-[9px] font-orbitron tracking-wider uppercase border border-destructive/30 text-destructive rounded px-1.5 py-px">
+                          Sin cupo
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span>{formatCurrency(menu.precio)} / unidad</span>
+                      <span>Cupo: {menu.cupoDisponible ?? menu.cupoDiario} restantes</span>
+                    </div>
+                  </div>
+                </label>
+              )
+            })}
+          </div>
+        )}
+        {errors.menuId && <FieldError msg={errors.menuId.message} />}
+      </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">

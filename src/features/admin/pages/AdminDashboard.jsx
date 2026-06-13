@@ -57,6 +57,18 @@ export default function AdminDashboard() {
         <ResumenPanel resumen={resumen} isLoading={loadingResumen} />
       </div>
 
+      {!loadingResumen && !resumenError && resumen?.pedidosPendientesEntrega?.length > 0 && (
+        <section className="mb-7">
+          <div className="mb-4">
+            <h2 className="font-semibold text-foreground">Pedidos pendientes de entrega</h2>
+            <p className="text-sm text-muted-foreground">
+              Pedidos confirmados que todavía deben marcarse como entregados.
+            </p>
+          </div>
+          <AdminTable pedidos={resumen.pedidosPendientesEntrega} onRowUpdated={handleRowUpdated} />
+        </section>
+      )}
+
       {/* Filters */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-4">

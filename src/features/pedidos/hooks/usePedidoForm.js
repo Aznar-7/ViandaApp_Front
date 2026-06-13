@@ -16,6 +16,7 @@ const createSchema = z.object({
 })
 
 const editSchema = z.object({
+  menuId: z.coerce.number().min(1, 'Seleccione un menú'),
   cantidad: z.coerce.number().min(1, 'Mínimo 1').max(10, 'Máximo 10'),
   turnoEntrega: z.enum(['almuerzo', 'cena'], { required_error: 'Seleccione un turno' }),
   puntoRetiroId: z.coerce.number().min(1, 'Seleccione una sede'),
@@ -34,6 +35,8 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
     resolver: zodResolver(isEdit ? editSchema : createSchema),
     defaultValues: isEdit
       ? {
+          menuId: defaultValues?.menuId ?? '',
+          fecha: defaultValues?.fecha ?? '',
           cantidad: defaultValues?.cantidad ?? 1,
           turnoEntrega: defaultValues?.turnoEntrega ?? '',
           puntoRetiroId: defaultValues?.puntoRetiroId ?? '',
@@ -76,7 +79,7 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
   }, [])
 
   useEffect(() => {
-    if (isEdit || !watchFecha) return
+    if (!watchFecha) return
     let cancelled = false
     setLoadingMenus(true)
     setMenusError('')
@@ -97,7 +100,7 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
     return () => {
       cancelled = true
     }
-  }, [isEdit, watchFecha])
+  }, [watchFecha])
 
   const selectedMenu = useMemo(
     () => menus.find((m) => String(m.id) === String(watchMenuId)) ?? null,
@@ -105,7 +108,7 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
   )
 
   const total = selectedMenu ? selectedMenu.precio * (watchCantidad || 0) : 0
-  const canSubmit = !sedesError && (isEdit || (!menusError && menus.length > 0))
+  const canSubmit = !sedesError && !menusError && menus.length > 0
 
   return {
     form,

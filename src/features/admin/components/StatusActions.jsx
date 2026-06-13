@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import adminService from '../services/adminService'
+import { refreshMenuAvailability } from '@/features/menus/utils/menuAvailability'
 
 const ACTIONS = {
   pendiente: [
@@ -56,7 +57,12 @@ export default function StatusActions({ pedido, onSuccess }) {
     setLoading(true)
     try {
       const updated = await selected.call(pedido.id)
-      toast.success(`Pedido #${pedido.id} actualizado`, { description: `Nuevo estado: ${selected.label.toLowerCase()}.` })
+      if (selected.key === 'cancelar' || selected.key === 'entregar') {
+        await refreshMenuAvailability().catch(() => null)
+      }
+      toast.success(`Pedido #${pedido.id} actualizado`, {
+        description: `Nuevo estado: ${selected.label.toLowerCase()}.`,
+      })
       onSuccess?.(updated)
     } catch (err) {
       toast.error('No se pudo realizar la acción', { description: err.response?.data?.error })
@@ -89,7 +95,9 @@ export default function StatusActions({ pedido, onSuccess }) {
       </div>
       <ConfirmDialog
         open={!!selected}
-        onOpenChange={(open) => { if (!open) setSelected(null) }}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null)
+        }}
         title={`${selected?.label ?? 'Actualizar'} pedido #${pedido.id}`}
         description={selected?.description}
         confirmLabel={selected?.label}

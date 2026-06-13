@@ -12,13 +12,15 @@ import PedidoForm from '../components/PedidoForm'
 import Spinner from '@/shared/components/Spinner'
 import ErrorMessage from '@/shared/components/ErrorMessage'
 import CommandHeader from '@/shared/components/CommandHeader'
+import { EDITABLE_ESTADOS } from '../constants'
+import { refreshMenuAvailability } from '@/features/menus/utils/menuAvailability'
 
 /* ─── PREVIEW PANEL (panel derecho del espacio libre) ─────────── */
 
 function MenuPreviewCard({ preview }) {
   const [imgFailed, setImgFailed] = useState(false)
   const { menu, total, cantidad } = preview
-  const tipo     = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
+  const tipo = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
   const imageUrl = getMenuImageUrl(menu.imagenUrl)
   const hasImage = imageUrl && !imgFailed
 
@@ -45,7 +47,12 @@ function MenuPreviewCard({ preview }) {
 
       <div className="space-y-4 p-5">
         <div>
-          <span className={cn('text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px', tipo.badge)}>
+          <span
+            className={cn(
+              'text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px',
+              tipo.badge
+            )}
+          >
             {tipo.label}
           </span>
           <h3 className="mt-2 font-orbitron text-sm font-bold leading-snug text-foreground">
@@ -68,7 +75,9 @@ function MenuPreviewCard({ preview }) {
           </div>
           <div className="flex items-center justify-between text-muted-foreground">
             <span>Cupo disponible</span>
-            <span className="font-medium text-foreground">{menu.cupoDisponible ?? menu.cupoDiario}</span>
+            <span className="font-medium text-foreground">
+              {menu.cupoDisponible ?? menu.cupoDiario}
+            </span>
           </div>
           <div className="flex items-center justify-between text-muted-foreground">
             <span>Cantidad seleccionada</span>
@@ -84,6 +93,9 @@ function MenuPreviewCard({ preview }) {
             {formatCurrency(total)}
           </span>
         </div>
+        <p className="text-[10px] leading-relaxed text-muted-foreground">
+          El total definitivo lo recalcula el backend al confirmar.
+        </p>
       </div>
     </motion.div>
   )
@@ -158,16 +170,16 @@ function SuccessOverlay({ data }) {
 /* ─── PAGE ─────────────────────────────────────────────────────── */
 
 export default function PedidoFormPage() {
-  const { id }           = useParams()
-  const [searchParams]   = useSearchParams()
-  const navigate         = useNavigate()
-  const isEdit           = Boolean(id)
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const isEdit = Boolean(id)
 
   const { pedido, isLoading, error } = usePedidoDetail(isEdit ? id : null)
-  const [submitting, setSubmitting]  = useState(false)
-  const [submitError, setSubmitError]= useState(null)
-  const [successData, setSuccessData]= useState(null)
-  const [preview, setPreview]        = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
+  const [successData, setSuccessData] = useState(null)
+  const [preview, setPreview] = useState(null)
 
   const preselectedMenuId = searchParams.get('menuId')
 
@@ -176,9 +188,19 @@ export default function PedidoFormPage() {
     setSubmitError(null)
     try {
       if (isEdit) {
-        const { cantidad, turnoEntrega, puntoRetiroId, observaciones } = data
-        await pedidoService.updatePedido(id, { cantidad, turnoEntrega, puntoRetiroId, observaciones })
-        setSuccessData({ type: 'update', nombre: pedido?.menuNombre })
+        const { menuId, cantidad, turnoEntrega, puntoRetiroId, observaciones } = data
+        const updated = await pedidoService.updatePedido(id, {
+          menuId,
+          cantidad,
+          turnoEntrega,
+          puntoRetiroId,
+          observaciones,
+        })
+        await refreshMenuAvailability().catch(() => null)
+        setSuccessData({
+          type: 'update',
+          nombre: `${updated.menuNombre} · ${formatCurrency(updated.total)}`,
+        })
         setTimeout(() => navigate(`/pedidos/${id}`, { replace: true }), 1800)
       } else {
         const created = await pedidoService.createPedido(data)
@@ -192,24 +214,23 @@ export default function PedidoFormPage() {
     }
   }
 
-  const defaultValues = isEdit && pedido
-    ? {
-        menuId:        pedido.menuId,
-        fecha:         pedido.fecha,
-        cantidad:      pedido.cantidad,
-        turnoEntrega:  pedido.turnoEntrega,
-        puntoRetiroId: pedido.puntoRetiroId,
-        observaciones: pedido.observaciones ?? '',
-      }
-    : preselectedMenuId
-    ? { menuId: Number(preselectedMenuId) }
-    : undefined
+  const defaultValues =
+    isEdit && pedido
+      ? {
+          menuId: pedido.menuId,
+          fecha: pedido.fecha,
+          cantidad: pedido.cantidad,
+          turnoEntrega: pedido.turnoEntrega,
+          puntoRetiroId: pedido.puntoRetiroId,
+          observaciones: pedido.observaciones ?? '',
+        }
+      : preselectedMenuId
+        ? { menuId: Number(preselectedMenuId) }
+        : undefined
 
   return (
     <>
-      <AnimatePresence>
-        {successData && <SuccessOverlay data={successData} />}
-      </AnimatePresence>
+      <AnimatePresence>{successData && <SuccessOverlay data={successData} />}</AnimatePresence>
 
       <motion.div
         initial={{ opacity: 0, y: 14 }}
@@ -221,10 +242,12 @@ export default function PedidoFormPage() {
           eyebrow={isEdit ? 'Modificar orden' : 'Nueva orden'}
           title={isEdit ? 'Editar Pedido' : 'Solicitar Vianda'}
           code={isEdit ? `ORD / ${id}` : 'ORD / NEW'}
-          description={isEdit
-            ? 'Actualizá los datos permitidos antes de confirmar los cambios.'
-            : 'Configurá la ración, entrega y cantidad de la nueva solicitud.'}
-          back={(
+          description={
+            isEdit
+              ? 'Actualizá los datos permitidos antes de confirmar los cambios.'
+              : 'Configurá la ración, entrega y cantidad de la nueva solicitud.'
+          }
+          back={
             <Link
               to={isEdit ? `/pedidos/${id}` : '/pedidos'}
               className={cn(
@@ -232,32 +255,42 @@ export default function PedidoFormPage() {
                 'gap-1.5 -ml-2 mb-3 font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground'
               )}
             >
-              <ArrowLeft className="w-3.5 h-3.5" />{isEdit ? 'Detalle' : 'Mis pedidos'}
+              <ArrowLeft className="w-3.5 h-3.5" />
+              {isEdit ? 'Detalle' : 'Mis pedidos'}
             </Link>
-          )}
+          }
         />
 
         {isEdit && isLoading && <Spinner />}
         {isEdit && !isLoading && error && <ErrorMessage message={error} />}
 
-        {(!isEdit || (!isLoading && !error && pedido)) && (
+        {isEdit && !isLoading && !error && pedido && !EDITABLE_ESTADOS.includes(pedido.estado) && (
+          <ErrorMessage message="Solo se pueden editar pedidos pendientes o confirmados." />
+        )}
+
+        {(!isEdit ||
+          (!isLoading && !error && pedido && EDITABLE_ESTADOS.includes(pedido.estado))) && (
           <div className={cn('flex items-start gap-6', !isEdit && 'max-w-5xl')}>
             {/* Formulario — mantiene su ancho original */}
             <div className="min-w-0 w-full max-w-3xl shrink-0">
               <PedidoForm
                 isEdit={isEdit}
-                pedidoInfo={isEdit && pedido ? { menuNombre: pedido.menuNombre, fecha: pedido.fecha } : undefined}
+                pedidoInfo={
+                  isEdit && pedido
+                    ? { menuNombre: pedido.menuNombre, fecha: pedido.fecha }
+                    : undefined
+                }
                 defaultValues={defaultValues}
                 onSubmit={handleSubmit}
                 isLoading={submitting}
                 error={submitError}
-                onPreviewChange={!isEdit ? setPreview : undefined}
+                onPreviewChange={setPreview}
               />
             </div>
 
             {/* Panel lateral — usa el espacio blanco a la derecha */}
             <AnimatePresence>
-              {!isEdit && preview && (
+              {preview && (
                 <motion.div
                   initial={{ opacity: 0, x: 12 }}
                   animate={{ opacity: 1, x: 0 }}

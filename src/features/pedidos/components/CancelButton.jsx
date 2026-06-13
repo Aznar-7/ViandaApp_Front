@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import pedidoService from '../services/pedidoService'
+import { refreshMenuAvailability } from '@/features/menus/utils/menuAvailability'
 
 export default function CancelButton({ pedidoId, onSuccess, size = 'default', className }) {
   const [loading, setLoading] = useState(false)
@@ -14,6 +15,7 @@ export default function CancelButton({ pedidoId, onSuccess, size = 'default', cl
     setLoading(true)
     try {
       const updated = await pedidoService.cancelar(pedidoId)
+      await refreshMenuAvailability().catch(() => null)
       toast.success('Pedido cancelado', { description: `La orden #${pedidoId} quedó anulada.` })
       onSuccess?.(updated)
     } catch (err) {

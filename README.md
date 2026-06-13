@@ -332,29 +332,33 @@ Todas las rutas, excepto registro, login, listado público de menús y listado p
 Authorization: Bearer <token>
 ```
 
-| Método         | Endpoint                              | Acceso          | Uso principal                                  |
-| -------------- | ------------------------------------- | --------------- | ---------------------------------------------- |
-| `POST`         | `/api/auth/register`                  | Público         | Registrar una cuenta                           |
-| `POST`         | `/api/auth/login`                     | Público         | Obtener JWT y usuario                          |
-| `GET`          | `/api/menus`                          | Público         | Listar menús por `fecha`, `tipo` y `activo`    |
-| `GET`          | `/api/menus/:id`                      | Admin           | Consultar un menú                              |
-| `POST`         | `/api/menus`                          | Admin           | Crear un menú                                  |
-| `PUT`          | `/api/menus/:id`                      | Admin           | Editar un menú                                 |
-| `PATCH`        | `/api/menus/:id/activar`              | Admin           | Activar un menú                                |
-| `PATCH`        | `/api/menus/:id/desactivar`           | Admin           | Desactivar un menú                             |
-| `GET`          | `/api/pedidos`                        | Autenticado     | Buscar pedidos con filtros, paginación y orden |
-| `GET`          | `/api/pedidos/:id`                    | Autenticado     | Consultar detalle                              |
-| `GET`          | `/api/pedidos/:id/historial`          | Autenticado     | Consultar historial                            |
-| `POST`         | `/api/pedidos`                        | Autenticado     | Crear pedido                                   |
-| `PUT`          | `/api/pedidos/:id`                    | Autenticado     | Editar pedido                                  |
-| `PATCH`        | `/api/pedidos/:id/cancelar`           | Autenticado     | Cancelar pedido                                |
-| `PATCH`        | `/api/pedidos/:id/confirmar`          | Admin           | Confirmar pedido                               |
-| `PATCH`        | `/api/pedidos/:id/entregar`           | Admin           | Marcar como entregado                          |
-| `GET`          | `/api/pedidos/resumen`                | Admin           | Obtener resumen operativo                      |
-| `GET/POST/PUT` | `/api/sedes` y `/api/sedes/:id`       | Según operación | Consultar y gestionar sedes                    |
-| `GET/POST/PUT` | `/api/usuarios` y `/api/usuarios/:id` | Admin           | Gestionar usuarios y roles                     |
+| Método         | Endpoint                              | Acceso          | Uso principal                                      |
+| -------------- | ------------------------------------- | --------------- | -------------------------------------------------- |
+| `POST`         | `/api/auth/register`                  | Público         | Registrar una cuenta                               |
+| `POST`         | `/api/auth/login`                     | Público         | Obtener JWT y usuario                              |
+| `GET`          | `/api/menus`                          | Público         | Listar menús por `fecha`, `tipo` y `activo`        |
+| `GET`          | `/api/menus/:id`                      | Admin           | Consultar un menú                                  |
+| `POST`         | `/api/menus`                          | Admin           | Crear un menú                                      |
+| `PUT`          | `/api/menus/:id`                      | Admin           | Editar un menú                                     |
+| `PATCH`        | `/api/menus/:id/activar`              | Admin           | Activar un menú                                    |
+| `PATCH`        | `/api/menus/:id/desactivar`           | Admin           | Desactivar un menú                                 |
+| `GET`          | `/api/pedidos`                        | Autenticado     | Buscar pedidos con filtros, paginación y orden     |
+| `GET`          | `/api/pedidos/:id`                    | Autenticado     | Consultar detalle                                  |
+| `GET`          | `/api/pedidos/:id/historial`          | Autenticado     | Consultar historial                                |
+| `POST`         | `/api/pedidos`                        | Autenticado     | Crear pedido                                       |
+| `PUT`          | `/api/pedidos/:id`                    | Autenticado     | Editar menú, cantidad, turno, sede u observaciones |
+| `PATCH`        | `/api/pedidos/:id/cancelar`           | Autenticado     | Cancelar pedido                                    |
+| `PATCH`        | `/api/pedidos/:id/confirmar`          | Admin           | Confirmar pedido                                   |
+| `PATCH`        | `/api/pedidos/:id/entregar`           | Admin           | Marcar como entregado                              |
+| `GET`          | `/api/pedidos/resumen`                | Admin           | Obtener resumen operativo                          |
+| `GET/POST/PUT` | `/api/sedes` y `/api/sedes/:id`       | Según operación | Consultar y gestionar sedes                        |
+| `GET/POST/PUT` | `/api/usuarios` y `/api/usuarios/:id` | Admin           | Gestionar usuarios y roles                         |
 
 El listado de pedidos envía los parámetros `estado`, `fecha`, `menuId`, `tipo`, `page`, `limit`, `sortBy` y `order`. Los filtros, la paginación y el ordenamiento son resueltos por la API.
+
+El formulario de edición muestra únicamente menús activos correspondientes a la fecha original del pedido. El total mostrado durante la selección es estimativo: el backend recalcula y devuelve el total definitivo según el precio real del menú.
+
+El resumen administrativo consume directamente `GET /api/pedidos/resumen` y presenta pedidos por estado y fecha, pendientes por fecha, cupos restantes, importe estimado confirmado, pendientes de entrega, recaudación y menú más solicitado del día.
 
 ### Errores de negocio visibles
 
@@ -423,7 +427,7 @@ Resultado esperado:
 
 ## Limitaciones conocidas
 
-- El resumen administrativo recorre todas las páginas de pedidos pendientes para construir la agrupación por fecha. En instalaciones con volúmenes muy altos conviene trasladar esta agregación a un endpoint específico del backend.
+- El resumen administrativo depende de las agregaciones entregadas por `GET /api/pedidos/resumen`; el frontend no recalcula importes ni cupos definitivos.
 - El token JWT se conserva en `localStorage`, una decisión adecuada para este trabajo académico. En un entorno productivo se recomienda evaluar cookies `HttpOnly` y una estrategia de renovación de sesión.
 - Las imágenes se referencian mediante `imagenUrl`; el frontend no incluye carga binaria de archivos.
 - Los cambios concurrentes de cupo pueden hacer que un menú visible deje de tener disponibilidad antes de confirmar. La API vuelve a validar y el frontend muestra el error correspondiente.
