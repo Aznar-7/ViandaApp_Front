@@ -943,6 +943,20 @@
   }
 }
 
+/* ── Custom scrollbar ─────────────────────────────── */
+.app-shell__content {
+  scrollbar-width: thin;
+  scrollbar-color: #E11D48 transparent;
+}
+
+.app-shell__content::-webkit-scrollbar { width: 5px; }
+.app-shell__content::-webkit-scrollbar-track { background: transparent; }
+.app-shell__content::-webkit-scrollbar-thumb {
+  background: #E11D48;
+  border-radius: 99px;
+}
+.app-shell__content::-webkit-scrollbar-thumb:hover { background: #be123c; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
