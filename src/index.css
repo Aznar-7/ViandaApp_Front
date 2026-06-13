@@ -740,7 +740,8 @@
 
   .dashboard-order-layout {
     display: grid;
-    gap: 1.25rem;
+    gap: 1.5rem;
+    align-items: start;
   }
 
   .dashboard-food {
@@ -759,13 +760,18 @@
 
   .daily-menu-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(1, minmax(0, 1fr));
     gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .daily-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   .daily-menu-card {
     display: flex;
     min-width: 0;
+    min-height: 9rem;
     overflow: hidden;
     border: 1px solid #ded8cc;
     border-radius: 1.15rem;
@@ -917,11 +923,11 @@
     background: rgba(225, 29, 72, 0.07);
   }
 
-  @media (min-width: 1280px) {
-    .dashboard-order-layout { grid-template-columns: minmax(0, 1fr) 21rem; }
+  @media (min-width: 1024px) {
+    .dashboard-order-layout { grid-template-columns: minmax(0, 1fr) 22rem; }
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 639px) {
     .daily-menu-grid { display: flex; margin-inline: -1rem; padding-inline: 1rem; gap: 0.75rem; overflow-x: auto; scroll-snap-type: x mandatory; }
     .daily-menu-card { min-width: min(86vw, 22rem); scroll-snap-align: start; }
     .daily-menu-card__visual { width: 5.2rem; }

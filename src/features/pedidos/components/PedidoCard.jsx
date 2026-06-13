@@ -47,7 +47,11 @@ export default function PedidoCard({ pedido, onCanceled }) {
           <MetaItem icon={Calendar}>{formatDate(pedido.fecha)}</MetaItem>
           <MetaItem icon={Users}>×{pedido.cantidad}</MetaItem>
           <MetaItem icon={Clock}><span className="capitalize">{pedido.turnoEntrega}</span></MetaItem>
-          <MetaItem icon={MapPin}><span className="block truncate">{pedido.puntoRetiro}</span></MetaItem>
+          <MetaItem icon={MapPin}>
+            <span className="block truncate">
+              {pedido.sedeNombre ?? pedido.sede?.nombre ?? pedido.puntoRetiro ?? '—'}
+            </span>
+          </MetaItem>
         </div>
 
         {/* Footer */}

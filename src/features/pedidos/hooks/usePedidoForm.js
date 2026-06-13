@@ -4,26 +4,29 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { todayISO } from '@/shared/utils'
 import menuService from '@/features/menus/services/menuService'
+import sedeService from '@/features/sedes/services/sedeService'
 
 const createSchema = z.object({
   menuId:        z.coerce.number().min(1, 'Seleccione un menú'),
   fecha:         z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
   cantidad:      z.coerce.number().min(1, 'Mínimo 1').max(10, 'Máximo 10'),
   turnoEntrega:  z.enum(['almuerzo', 'cena'], { required_error: 'Seleccione un turno' }),
-  puntoRetiro:   z.string().min(2, 'Mínimo 2 caracteres').max(200),
+  puntoRetiroId: z.coerce.number().min(1, 'Seleccione una sede'),
   observaciones: z.string().max(500).optional(),
 })
 
 const editSchema = z.object({
   cantidad:      z.coerce.number().min(1, 'Mínimo 1').max(10, 'Máximo 10'),
   turnoEntrega:  z.enum(['almuerzo', 'cena'], { required_error: 'Seleccione un turno' }),
-  puntoRetiro:   z.string().min(2, 'Mínimo 2 caracteres').max(200),
+  puntoRetiroId: z.coerce.number().min(1, 'Seleccione una sede'),
   observaciones: z.string().max(500).optional(),
 })
 
 export function usePedidoForm({ defaultValues, isEdit = false }) {
   const [menus, setMenus]               = useState([])
   const [loadingMenus, setLoadingMenus] = useState(!isEdit)
+  const [sedes, setSedes]               = useState([])
+  const [loadingSedes, setLoadingSedes] = useState(true)
 
   const form = useForm({
     resolver: zodResolver(isEdit ? editSchema : createSchema),
@@ -31,7 +34,7 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
       ? {
           cantidad:      defaultValues?.cantidad      ?? 1,
           turnoEntrega:  defaultValues?.turnoEntrega  ?? '',
-          puntoRetiro:   defaultValues?.puntoRetiro   ?? '',
+          puntoRetiroId: defaultValues?.puntoRetiroId ?? '',
           observaciones: defaultValues?.observaciones ?? '',
         }
       : {
@@ -39,7 +42,7 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
           fecha:         defaultValues?.fecha         ?? todayISO(),
           cantidad:      defaultValues?.cantidad      ?? 1,
           turnoEntrega:  defaultValues?.turnoEntrega  ?? '',
-          puntoRetiro:   defaultValues?.puntoRetiro   ?? '',
+          puntoRetiroId: defaultValues?.puntoRetiroId ?? '',
           observaciones: defaultValues?.observaciones ?? '',
         },
   })
@@ -47,6 +50,15 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
   const watchFecha    = form.watch('fecha')
   const watchMenuId   = form.watch('menuId')
   const watchCantidad = form.watch('cantidad')
+
+  useEffect(() => {
+    let cancelled = false
+    sedeService.getSedes()
+      .then((data) => { if (!cancelled) setSedes(Array.isArray(data) ? data : []) })
+      .catch(() => { if (!cancelled) setSedes([]) })
+      .finally(() => { if (!cancelled) setLoadingSedes(false) })
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     if (isEdit || !watchFecha) return
@@ -64,8 +76,8 @@ export function usePedidoForm({ defaultValues, isEdit = false }) {
     [menus, watchMenuId]
   )
 
-  const total    = selectedMenu ? selectedMenu.precio * (watchCantidad || 0) : 0
+  const total     = selectedMenu ? selectedMenu.precio * (watchCantidad || 0) : 0
   const canSubmit = isEdit || menus.length > 0
 
-  return { form, menus, loadingMenus, selectedMenu, total, canSubmit }
+  return { form, menus, loadingMenus, sedes, loadingSedes, selectedMenu, total, canSubmit }
 }

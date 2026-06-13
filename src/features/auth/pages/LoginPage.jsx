@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/context/AuthContext'
 import LoginForm from '../components/LoginForm'
@@ -148,6 +149,14 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10 w-full max-w-[400px]">
+          {/* Volver al inicio */}
+          <Link
+            to="/"
+            className="mb-8 inline-flex items-center gap-1.5 font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-3" />Inicio
+          </Link>
+
           {/* Encabezado del formulario */}
           <div className="mb-8">
             <div

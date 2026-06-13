@@ -1,15 +1,95 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, Check, ImageOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
+import { formatCurrency, getMenuImageUrl } from '@/shared/utils'
+import { TIPO_CONFIG } from '@/features/menus/constants'
 import { usePedidoDetail } from '../hooks/usePedidoDetail'
 import pedidoService from '../services/pedidoService'
 import PedidoForm from '../components/PedidoForm'
 import Spinner from '@/shared/components/Spinner'
 import ErrorMessage from '@/shared/components/ErrorMessage'
 import CommandHeader from '@/shared/components/CommandHeader'
+
+/* ─── PREVIEW PANEL (panel derecho del espacio libre) ─────────── */
+
+function MenuPreviewCard({ preview }) {
+  const [imgFailed, setImgFailed] = useState(false)
+  const { menu, total, cantidad } = preview
+  const tipo     = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
+  const imageUrl = getMenuImageUrl(menu.imagenUrl)
+  const hasImage = imageUrl && !imgFailed
+
+  return (
+    <motion.div
+      key={menu.id}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_48px_-42px_rgba(57,48,35,0.75)]"
+    >
+      {hasImage ? (
+        <img
+          src={imageUrl}
+          alt={menu.nombre}
+          className="h-44 w-full object-cover"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <div className="flex h-28 items-center justify-center bg-secondary/50">
+          <ImageOff className="size-8 text-muted-foreground/25" />
+        </div>
+      )}
+
+      <div className="space-y-4 p-5">
+        <div>
+          <span className={cn('text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px', tipo.badge)}>
+            {tipo.label}
+          </span>
+          <h3 className="mt-2 font-orbitron text-sm font-bold leading-snug text-foreground">
+            {menu.nombre}
+          </h3>
+        </div>
+
+        {menu.descripcion && (
+          <p className="text-xs leading-relaxed text-muted-foreground line-clamp-5">
+            {menu.descripcion}
+          </p>
+        )}
+
+        <div className="h-px bg-border" />
+
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Precio unitario</span>
+            <span className="font-medium text-foreground">{formatCurrency(menu.precio)}</span>
+          </div>
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Cupo disponible</span>
+            <span className="font-medium text-foreground">{menu.cupoDisponible ?? menu.cupoDiario}</span>
+          </div>
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Cantidad seleccionada</span>
+            <span className="font-medium text-foreground">×{cantidad}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl bg-primary/10 px-3 py-2.5">
+          <span className="font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground">
+            Total estimado
+          </span>
+          <span className="font-orbitron text-base font-bold text-foreground">
+            {formatCurrency(total)}
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+/* ─── SUCCESS OVERLAY ──────────────────────────────────────────── */
 
 function SuccessOverlay({ data }) {
   return (
@@ -75,6 +155,8 @@ function SuccessOverlay({ data }) {
   )
 }
 
+/* ─── PAGE ─────────────────────────────────────────────────────── */
+
 export default function PedidoFormPage() {
   const { id }           = useParams()
   const [searchParams]   = useSearchParams()
@@ -85,6 +167,7 @@ export default function PedidoFormPage() {
   const [submitting, setSubmitting]  = useState(false)
   const [submitError, setSubmitError]= useState(null)
   const [successData, setSuccessData]= useState(null)
+  const [preview, setPreview]        = useState(null)
 
   const preselectedMenuId = searchParams.get('menuId')
 
@@ -93,8 +176,8 @@ export default function PedidoFormPage() {
     setSubmitError(null)
     try {
       if (isEdit) {
-        const { cantidad, turnoEntrega, puntoRetiro, observaciones } = data
-        await pedidoService.updatePedido(id, { cantidad, turnoEntrega, puntoRetiro, observaciones })
+        const { cantidad, turnoEntrega, puntoRetiroId, observaciones } = data
+        await pedidoService.updatePedido(id, { cantidad, turnoEntrega, puntoRetiroId, observaciones })
         setSuccessData({ type: 'update', nombre: pedido?.menuNombre })
         setTimeout(() => navigate(`/pedidos/${id}`, { replace: true }), 1800)
       } else {
@@ -115,7 +198,7 @@ export default function PedidoFormPage() {
         fecha:         pedido.fecha,
         cantidad:      pedido.cantidad,
         turnoEntrega:  pedido.turnoEntrega,
-        puntoRetiro:   pedido.puntoRetiro,
+        puntoRetiroId: pedido.puntoRetiroId,
         observaciones: pedido.observaciones ?? '',
       }
     : preselectedMenuId
@@ -158,15 +241,37 @@ export default function PedidoFormPage() {
         {isEdit && !isLoading && error && <ErrorMessage message={error} />}
 
         {(!isEdit || (!isLoading && !error && pedido)) && (
-          <div className="max-w-3xl">
-            <PedidoForm
-              isEdit={isEdit}
-              pedidoInfo={isEdit && pedido ? { menuNombre: pedido.menuNombre, fecha: pedido.fecha } : undefined}
-              defaultValues={defaultValues}
-              onSubmit={handleSubmit}
-              isLoading={submitting}
-              error={submitError}
-            />
+          <div className={cn('flex items-start gap-6', !isEdit && 'max-w-5xl')}>
+            {/* Formulario — mantiene su ancho original */}
+            <div className="min-w-0 w-full max-w-3xl shrink-0">
+              <PedidoForm
+                isEdit={isEdit}
+                pedidoInfo={isEdit && pedido ? { menuNombre: pedido.menuNombre, fecha: pedido.fecha } : undefined}
+                defaultValues={defaultValues}
+                onSubmit={handleSubmit}
+                isLoading={submitting}
+                error={submitError}
+                onPreviewChange={!isEdit ? setPreview : undefined}
+              />
+            </div>
+
+            {/* Panel lateral — usa el espacio blanco a la derecha */}
+            <AnimatePresence>
+              {!isEdit && preview && (
+                <motion.div
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 12 }}
+                  transition={{ duration: 0.3 }}
+                  className="hidden lg:block w-72 shrink-0 sticky top-6"
+                >
+                  <p className="mb-3 font-orbitron text-[9px] tracking-[0.4em] uppercase text-primary">
+                    Ración seleccionada
+                  </p>
+                  <MenuPreviewCard preview={preview} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </motion.div>

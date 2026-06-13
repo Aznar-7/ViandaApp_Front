@@ -11,7 +11,7 @@ import CommandHeader from '@/shared/components/CommandHeader'
 
 export default function PedidoDetailPage() {
   const { id } = useParams()
-  const { pedido, historial, isLoading, error, refetch, setPedido } = usePedidoDetail(id)
+  const { pedido, historial, menu, isLoading, error, refetch, setPedido } = usePedidoDetail(id)
 
   function handleCanceled(updated) {
     setPedido(updated)
@@ -41,6 +41,7 @@ export default function PedidoDetailPage() {
         <PedidoDetail
           pedido={pedido}
           historial={historial}
+          menu={menu}
           onCanceled={handleCanceled}
         />
       )}

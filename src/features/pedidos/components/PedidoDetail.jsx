@@ -1,16 +1,19 @@
+import { Fragment, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import {
-  Ban, Calendar, Clock, Edit2, Hash, Hourglass, MapPin,
-  PackageCheck, ReceiptText, ShieldCheck, StickyNote, Users,
+  Ban, Calendar, Check, Clock, Edit2, Hash, Hourglass, MapPin,
+  PackageCheck, ReceiptText, ShieldCheck, StickyNote, UtensilsCrossed, Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatDateFull, formatCurrency } from '@/shared/utils'
+import { formatDateFull, formatCurrency, getMenuImageUrl } from '@/shared/utils'
 import { buttonVariants } from '@/components/ui/button'
 import StatusBadge from './StatusBadge'
 import CancelButton from './CancelButton'
 import HistorialTimeline from './HistorialTimeline'
 import { CANCELABLE_ESTADOS, EDITABLE_ESTADOS } from '../constants'
+
+/* ─── STATUS HERO ─────────────────────────────────────────────────── */
 
 const STATUS_HERO_CONFIG = {
   entregado: {
@@ -90,6 +93,157 @@ function StatusHero({ pedido }) {
   )
 }
 
+/* ─── PHASE ROADMAP ───────────────────────────────────────────────── */
+
+const ROADMAP_STEPS = [
+  { key: 'pendiente',  label: 'Pendiente',  Icon: Hourglass,   desc: 'Solicitud enviada'  },
+  { key: 'confirmado', label: 'Confirmado', Icon: ShieldCheck, desc: 'Aprobado'            },
+  { key: 'entregado',  label: 'Entregado',  Icon: PackageCheck, desc: 'Ración retirada'   },
+]
+
+function PhaseRoadmap({ estado, historial = [] }) {
+  const isCancelled  = estado === 'cancelado'
+  const wasConfirmed = historial.some((e) => e.accion === 'estado:pendiente->confirmado')
+  const currentIdx   = isCancelled ? -1 : ROADMAP_STEPS.findIndex((s) => s.key === estado)
+
+  const steps = isCancelled
+    ? [...ROADMAP_STEPS, { key: 'cancelado', label: 'Cancelado', Icon: Ban, desc: 'Solicitud anulada' }]
+    : ROADMAP_STEPS
+
+  function stepStatus(idx) {
+    if (!isCancelled) {
+      if (idx < currentIdx) return 'done'
+      if (idx === currentIdx) return 'current'
+      return 'future'
+    }
+    if (idx === 0) return 'done'
+    if (idx === 1) return wasConfirmed ? 'done' : 'skipped'
+    if (idx === 2) return 'skipped'
+    return 'cancelled'
+  }
+
+  function iconClass(status) {
+    if (status === 'done')      return 'border-emerald-500 bg-emerald-500/15 text-emerald-500'
+    if (status === 'current')   return 'border-primary bg-primary/15 text-primary'
+    if (status === 'cancelled') return 'border-destructive bg-destructive/10 text-destructive'
+    return 'border-border bg-secondary/50 text-muted-foreground/30'
+  }
+
+  function labelClass(status) {
+    if (status === 'done')      return 'text-emerald-500'
+    if (status === 'current')   return 'text-foreground font-bold'
+    if (status === 'cancelled') return 'text-destructive'
+    return 'text-muted-foreground/40'
+  }
+
+  function connectorColor(toIdx) {
+    const s = stepStatus(toIdx)
+    if (s === 'done')    return 'bg-emerald-500/50'
+    if (s === 'current') return 'bg-primary/30'
+    return 'bg-border'
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: 0.1 }}
+      className="rounded-2xl border border-border bg-card p-5"
+    >
+      <p className="mb-5 font-orbitron text-[9px] tracking-[0.4em] uppercase text-primary">
+        Progreso del pedido
+      </p>
+
+      <div className="flex items-start">
+        {steps.map((step, idx) => {
+          const status = stepStatus(idx)
+          const Icon   = step.Icon
+          const isLast = idx === steps.length - 1
+
+          return (
+            <Fragment key={step.key}>
+              {/* Step */}
+              <div className="flex flex-1 flex-col items-center text-center">
+                {/* Icon row with half-lines — always rendered to keep icon centered */}
+                <div className="flex w-full items-center">
+                  <div className={cn('h-px flex-1 transition-colors', idx > 0 ? connectorColor(idx) : 'invisible')} />
+                  <div className={cn(
+                    'flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300',
+                    iconClass(status),
+                    status === 'current' && estado === 'pendiente' && 'animate-pulse'
+                  )}>
+                    {status === 'done'
+                      ? <Check className="size-3.5" />
+                      : <Icon className="size-3.5" />
+                    }
+                  </div>
+                  <div className={cn('h-px flex-1 transition-colors', !isLast ? connectorColor(idx + 1) : 'invisible')} />
+                </div>
+
+                {/* Labels */}
+                <span className={cn(
+                  'mt-2 font-orbitron text-[9px] tracking-wider uppercase leading-tight transition-colors',
+                  labelClass(status)
+                )}>
+                  {step.label}
+                </span>
+                <span className="mt-0.5 hidden text-[9px] leading-tight text-muted-foreground/50 sm:block">
+                  {step.desc}
+                </span>
+              </div>
+            </Fragment>
+          )
+        })}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ─── MENU INFO CARD ──────────────────────────────────────────────── */
+
+function MenuInfoCard({ menu, pedido }) {
+  const [imgFailed, setImgFailed] = useState(false)
+  const imageUrl = menu?.imagenUrl ? getMenuImageUrl(menu.imagenUrl) : null
+  const hasImage = imageUrl && !imgFailed
+  const hasDesc  = Boolean(menu?.descripcion)
+
+  if (!hasImage && !hasDesc) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.15 }}
+      className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3"
+    >
+      {hasImage && (
+        <img
+          src={imageUrl}
+          alt={pedido.menuNombre}
+          className="h-16 w-16 shrink-0 rounded-xl object-cover border border-border"
+          onError={() => setImgFailed(true)}
+        />
+      )}
+      <div className="min-w-0 py-0.5">
+        <div className="mb-1 flex items-center gap-1.5">
+          <UtensilsCrossed className="size-2.5 text-primary shrink-0" />
+          <span className="font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground">
+            Menú seleccionado
+          </span>
+        </div>
+        <p className="font-semibold text-foreground leading-snug">{pedido.menuNombre}</p>
+        {hasDesc && (
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
+            {menu.descripcion}
+          </p>
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ─── INFO ITEM ───────────────────────────────────────────────────── */
+
 const infoContainerVariants = {
   hidden:   {},
   visible:  { transition: { staggerChildren: 0.055, delayChildren: 0.08 } },
@@ -99,16 +253,43 @@ const infoItemVariants = {
   visible:  { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
 }
 
-export default function PedidoDetail({ pedido, historial, onCanceled }) {
+function InfoItem({ icon: Icon, label, value, emphasis = false, muted = false }) {
+  return (
+    <motion.div variants={infoItemVariants} className="rounded-lg border border-border/70 bg-secondary/35 p-3">
+      <div className="mb-1.5 flex items-center gap-1.5">
+        <Icon className="w-3 h-3 text-primary" />
+        <span className="font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground">
+          {label}
+        </span>
+      </div>
+      <div className={cn(
+        'break-words text-sm',
+        emphasis ? 'font-orbitron text-base font-bold text-foreground'
+          : muted ? 'text-muted-foreground italic'
+          : 'text-foreground'
+      )}>
+        {value}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ─── MAIN COMPONENT ──────────────────────────────────────────────── */
+
+export default function PedidoDetail({ pedido, historial, menu, onCanceled }) {
   return (
     <div className="space-y-4">
       <AnimatePresence mode="wait">
         <StatusHero key={pedido.estado} pedido={pedido} />
       </AnimatePresence>
 
+      <PhaseRoadmap estado={pedido.estado} historial={historial} />
+
       <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         {/* Main info */}
         <div className="min-w-0 space-y-4">
+          <MenuInfoCard menu={menu} pedido={pedido} />
+
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_48px_-42px_rgba(57,48,35,0.75)]">
             <div className="flex flex-col gap-4 border-b border-border bg-secondary/35 p-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
@@ -145,7 +326,20 @@ export default function PedidoDetail({ pedido, historial, onCanceled }) {
                 <InfoItem icon={Hash}     label="Total"    emphasis value={formatCurrency(pedido.total)} />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <InfoItem icon={MapPin}    label="Punto de retiro" value={pedido.puntoRetiro} />
+                <InfoItem
+                  icon={MapPin}
+                  label="Sede de entrega"
+                  value={
+                    <span className="block">
+                      <span className="block">{pedido.sedeNombre ?? pedido.sede?.nombre ?? pedido.puntoRetiro ?? '—'}</span>
+                      {(pedido.sedeDireccion ?? pedido.sede?.direccion) && (
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          {pedido.sedeDireccion ?? pedido.sede?.direccion}
+                        </span>
+                      )}
+                    </span>
+                  }
+                />
                 <InfoItem icon={StickyNote} label="Observaciones" value={pedido.observaciones || 'Sin observaciones'} muted={!pedido.observaciones} />
               </div>
             </motion.div>
@@ -167,9 +361,9 @@ export default function PedidoDetail({ pedido, historial, onCanceled }) {
                 {EDITABLE_ESTADOS.includes(pedido.estado) && (
                   <Link
                     to={`/pedidos/${pedido.id}/editar`}
-                    className={cn(buttonVariants({ variant: 'outline' }), 'gap-1.5')}
+                    className={cn(buttonVariants({ variant: 'default' }), 'gap-1.5')}
                   >
-                    <Edit2 className="w-3 h-3" /> Editar pedido
+                    <Edit2 className="w-3.5 h-3.5" /> Editar pedido
                   </Link>
                 )}
                 {CANCELABLE_ESTADOS.includes(pedido.estado) && (
@@ -186,26 +380,5 @@ export default function PedidoDetail({ pedido, historial, onCanceled }) {
         </div>
       </div>
     </div>
-  )
-}
-
-function InfoItem({ icon: Icon, label, value, emphasis = false, muted = false }) {
-  return (
-    <motion.div variants={infoItemVariants} className="rounded-lg border border-border/70 bg-secondary/35 p-3">
-      <div className="mb-1.5 flex items-center gap-1.5">
-        <Icon className="w-3 h-3 text-primary" />
-        <span className="font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground">
-          {label}
-        </span>
-      </div>
-      <div className={cn(
-        'break-words text-sm',
-        emphasis ? 'font-orbitron text-base font-bold text-foreground'
-          : muted ? 'text-muted-foreground italic'
-          : 'text-foreground'
-      )}>
-        {value}
-      </div>
-    </motion.div>
   )
 }

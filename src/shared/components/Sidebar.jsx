@@ -7,7 +7,7 @@ import {
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
-import Order66Mark from './Order66Mark'
+import ImperialCrest from './ImperialCrest'
 
 const USER_SECTIONS = [{
   label: 'Operación',
@@ -57,7 +57,7 @@ function Brand({ home, onClose, collapsed, onToggleCollapsed }) {
   return (
     <div className="sidebar-brand">
       <Link to={home} onClick={onClose} className="flex min-w-0 items-center gap-3" aria-label="Inicio">
-        <Order66Mark className="shrink-0" />
+        <ImperialCrest className="size-9 shrink-0 text-white" />
         <span className="sidebar-collapsible-copy min-w-0">
           <span className="sidebar-brand__name">Orden 66</span>
           <span className="sidebar-brand__product">Gestión de viandas</span>

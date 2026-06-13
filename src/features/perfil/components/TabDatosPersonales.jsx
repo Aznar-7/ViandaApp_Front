@@ -1,13 +1,13 @@
-import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { Save, Loader2, Mail } from 'lucide-react'
-import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { NativeSelect } from '@/components/ui/native-select'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import perfilService from '../services/perfilService'
 
 const PUNTOS_RETIRO = ['Sede central', 'Cantina Norte', 'Cantina Sur', 'Edificio A', 'Edificio B']
@@ -22,7 +22,7 @@ const schema = z.object({
 export default function TabDatosPersonales({ user }) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, control, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       nombre: user?.nombre ?? '',
@@ -79,25 +79,55 @@ export default function TabDatosPersonales({ user }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="puntoRetiro" className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
+        <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
           Punto de retiro preferido
         </Label>
-        <NativeSelect id="puntoRetiro" {...register('puntoRetiro')}>
-          {PUNTOS_RETIRO.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </NativeSelect>
+        <Controller
+          name="puntoRetiro"
+          control={control}
+          render={({ field }) => (
+            <Select
+              value={field.value ?? ''}
+              onValueChange={field.onChange}
+              items={PUNTOS_RETIRO.map((p) => ({ value: p, label: p }))}
+            >
+              <SelectTrigger className="w-full" aria-invalid={!!errors.puntoRetiro}>
+                <SelectValue placeholder="Seleccionar punto..." />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {PUNTOS_RETIRO.map((p) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="turno" className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
+        <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
           Turno preferido
         </Label>
-        <NativeSelect id="turno" {...register('turno')}>
-          {TURNOS.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </NativeSelect>
+        <Controller
+          name="turno"
+          control={control}
+          render={({ field }) => (
+            <Select
+              value={field.value ?? ''}
+              onValueChange={field.onChange}
+              items={TURNOS.map((t) => ({ value: t, label: t }))}
+            >
+              <SelectTrigger className="w-full" aria-invalid={!!errors.turno}>
+                <SelectValue placeholder="Seleccionar turno..." />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {TURNOS.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <Button type="submit" disabled={isLoading} className="gap-2">
