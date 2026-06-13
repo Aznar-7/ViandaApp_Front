@@ -902,7 +902,8 @@
     transition: background 140ms ease;
   }
 
-  .recent-order-row:last-child { border-bottom: 0; }
+  .recent-order-row:last-child,
+  .recent-orders > *:last-child .recent-order-row { border-bottom: 0; }
   .recent-order-row:hover { background: #f8f4ec; }
 
   .recent-order-row__id {

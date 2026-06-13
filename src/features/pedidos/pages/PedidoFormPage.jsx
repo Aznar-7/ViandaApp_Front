@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { motion } from 'motion/react'
-import { ArrowLeft } from 'lucide-react'
-import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'motion/react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 import { usePedidoDetail } from '../hooks/usePedidoDetail'
@@ -12,17 +11,81 @@ import Spinner from '@/shared/components/Spinner'
 import ErrorMessage from '@/shared/components/ErrorMessage'
 import CommandHeader from '@/shared/components/CommandHeader'
 
+function SuccessOverlay({ data }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0, y: 16 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.92, opacity: 0 }}
+        transition={{ delay: 0.05, type: 'spring', stiffness: 240, damping: 22 }}
+        className="mx-4 w-full max-w-sm rounded-3xl border border-border bg-card p-8 text-center shadow-2xl"
+      >
+        <motion.div
+          initial={{ scale: 0.3, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.16, type: 'spring', stiffness: 280, damping: 18 }}
+          className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-emerald-500/12 ring-4 ring-emerald-500/18"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.28, type: 'spring', stiffness: 320, damping: 16 }}
+            className="flex size-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+          >
+            <Check className="size-8 stroke-[2.5]" />
+          </motion.div>
+        </motion.div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.36 }}
+          className="text-xl font-bold text-foreground"
+        >
+          {data.type === 'create' ? '¡Pedido creado!' : '¡Cambios guardados!'}
+        </motion.h2>
+
+        {data.nombre && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.44 }}
+            className="mt-2 text-sm text-muted-foreground"
+          >
+            {data.nombre}
+          </motion.p>
+        )}
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.52 }}
+          className="mt-5 font-orbitron text-[9px] tracking-[0.3em] uppercase text-primary"
+        >
+          Redirigiendo al detalle...
+        </motion.p>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 export default function PedidoFormPage() {
-  const { id }          = useParams()
-  const [searchParams]  = useSearchParams()
-  const navigate        = useNavigate()
-  const isEdit          = Boolean(id)
+  const { id }           = useParams()
+  const [searchParams]   = useSearchParams()
+  const navigate         = useNavigate()
+  const isEdit           = Boolean(id)
 
   const { pedido, isLoading, error } = usePedidoDetail(isEdit ? id : null)
   const [submitting, setSubmitting]  = useState(false)
   const [submitError, setSubmitError]= useState(null)
+  const [successData, setSuccessData]= useState(null)
 
-  // Pre-select menu from query param when creating
   const preselectedMenuId = searchParams.get('menuId')
 
   async function handleSubmit(data) {
@@ -32,12 +95,12 @@ export default function PedidoFormPage() {
       if (isEdit) {
         const { cantidad, turnoEntrega, puntoRetiro, observaciones } = data
         await pedidoService.updatePedido(id, { cantidad, turnoEntrega, puntoRetiro, observaciones })
-        toast.success('Pedido actualizado')
-        navigate(`/pedidos/${id}`, { replace: true })
+        setSuccessData({ type: 'update', nombre: pedido?.menuNombre })
+        setTimeout(() => navigate(`/pedidos/${id}`, { replace: true }), 1800)
       } else {
         const created = await pedidoService.createPedido(data)
-        toast.success('Pedido creado', { description: `#${created.id} — ${created.menuNombre}` })
-        navigate(`/pedidos/${created.id}`, { replace: true })
+        setSuccessData({ type: 'create', nombre: created.menuNombre, id: created.id })
+        setTimeout(() => navigate(`/pedidos/${created.id}`, { replace: true }), 1800)
       }
     } catch (err) {
       setSubmitError(err.response?.data?.error ?? 'No se pudo procesar el pedido')
@@ -60,38 +123,53 @@ export default function PedidoFormPage() {
     : undefined
 
   return (
-    <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="order-form-consumer">
+    <>
+      <AnimatePresence>
+        {successData && <SuccessOverlay data={successData} />}
+      </AnimatePresence>
 
-      <CommandHeader
-        eyebrow={isEdit ? 'Modificar orden' : 'Nueva orden'}
-        title={isEdit ? 'Editar Pedido' : 'Solicitar Vianda'}
-        code={isEdit ? `ORD / ${id}` : 'ORD / NEW'}
-        description={isEdit ? 'Actualizá los datos permitidos antes de confirmar los cambios.' : 'Configurá la ración, entrega y cantidad de la nueva solicitud.'}
-        back={(
-          <Link
-          to={isEdit ? `/pedidos/${id}` : '/pedidos'}
-          className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'gap-1.5 -ml-2 mb-3 font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground')}
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />{isEdit ? 'Detalle' : 'Mis pedidos'}
-          </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="order-form-consumer"
+      >
+        <CommandHeader
+          eyebrow={isEdit ? 'Modificar orden' : 'Nueva orden'}
+          title={isEdit ? 'Editar Pedido' : 'Solicitar Vianda'}
+          code={isEdit ? `ORD / ${id}` : 'ORD / NEW'}
+          description={isEdit
+            ? 'Actualizá los datos permitidos antes de confirmar los cambios.'
+            : 'Configurá la ración, entrega y cantidad de la nueva solicitud.'}
+          back={(
+            <Link
+              to={isEdit ? `/pedidos/${id}` : '/pedidos'}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'gap-1.5 -ml-2 mb-3 font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground'
+              )}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />{isEdit ? 'Detalle' : 'Mis pedidos'}
+            </Link>
+          )}
+        />
+
+        {isEdit && isLoading && <Spinner />}
+        {isEdit && !isLoading && error && <ErrorMessage message={error} />}
+
+        {(!isEdit || (!isLoading && !error && pedido)) && (
+          <div className="max-w-3xl">
+            <PedidoForm
+              isEdit={isEdit}
+              pedidoInfo={isEdit && pedido ? { menuNombre: pedido.menuNombre, fecha: pedido.fecha } : undefined}
+              defaultValues={defaultValues}
+              onSubmit={handleSubmit}
+              isLoading={submitting}
+              error={submitError}
+            />
+          </div>
         )}
-      />
-
-      {isEdit && isLoading && <Spinner />}
-      {isEdit && !isLoading && error && <ErrorMessage message={error} />}
-
-      {(!isEdit || (!isLoading && !error && pedido)) && (
-        <div className="max-w-3xl">
-          <PedidoForm
-            isEdit={isEdit}
-            pedidoInfo={isEdit && pedido ? { menuNombre: pedido.menuNombre, fecha: pedido.fecha } : undefined}
-            defaultValues={defaultValues}
-            onSubmit={handleSubmit}
-            isLoading={submitting}
-            error={submitError}
-          />
-        </div>
-      )}
-    </motion.div>
+      </motion.div>
+    </>
   )
 }

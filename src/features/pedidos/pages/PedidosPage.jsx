@@ -13,8 +13,17 @@ import ErrorMessage from '@/shared/components/ErrorMessage'
 import Pagination from '@/shared/components/Pagination'
 import CommandHeader from '@/shared/components/CommandHeader'
 
+const gridVariants = {
+  hidden:   {},
+  visible:  { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+}
+const cardVariants = {
+  hidden:   { opacity: 0, y: 16 },
+  visible:  { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } },
+}
+
 export default function PedidosPage() {
-  const { user }   = useAuth()
+  const { user } = useAuth()
   const { pedidos, total, page, limit, isLoading, error, filters, setFilters, refetch } = usePedidos()
 
   const totalPages = Math.ceil(total / limit)
@@ -27,26 +36,27 @@ export default function PedidosPage() {
         eyebrow={user?.nombre}
         title="Mis Pedidos"
         code="ORD / USER"
-        description={!isLoading && !error ? `${total} orden${total !== 1 ? 'es' : ''} registrada${total !== 1 ? 's' : ''} en tu historial.` : 'Seguimiento y control de tus solicitudes.'}
+        description={
+          !isLoading && !error
+            ? `${total} orden${total !== 1 ? 'es' : ''} registrada${total !== 1 ? 's' : ''} en tu historial.`
+            : 'Seguimiento y control de tus solicitudes.'
+        }
         action={(
           <Link
             to="/pedidos/nuevo"
-            className={cn(buttonVariants({ size: 'sm' }), 'gap-1.5 text-sm shrink-0')}
+            className={cn(buttonVariants({ size: 'sm' }), 'shrink-0 gap-1.5 text-sm')}
           >
             <Plus className="w-4 h-4" /> Nueva orden
           </Link>
         )}
       />
 
-      {/* Filters */}
       <div className="mb-6">
         <PedidoFilters filters={filters} onChange={setFilters} />
       </div>
 
-      {/* Error */}
       {!isLoading && error && <ErrorMessage message={error} onRetry={refetch} />}
 
-      {/* Empty */}
       {!isLoading && !error && pedidos.length === 0 && (
         <EmptyState
           icon={ClipboardList}
@@ -57,20 +67,24 @@ export default function PedidosPage() {
         />
       )}
 
-      {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
         </div>
       ) : !error && pedidos.length > 0 && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <motion.div
+            variants={gridVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {pedidos.map((p) => (
-              <div key={p.id}>
+              <motion.div key={p.id} variants={cardVariants}>
                 <PedidoCard pedido={p} onCanceled={refetch} />
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           <Pagination
             page={page}
             totalPages={totalPages}

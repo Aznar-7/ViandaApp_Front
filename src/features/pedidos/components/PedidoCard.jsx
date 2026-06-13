@@ -10,7 +10,7 @@ import CancelButton from './CancelButton'
 function MetaItem({ icon: Icon, children }) {
   return (
     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-      <Icon className="w-3.5 h-3.5 shrink-0 text-muted-foreground/70" />
+      <Icon className="size-3.5 shrink-0 text-muted-foreground/70" />
       <span>{children}</span>
     </div>
   )
@@ -24,19 +24,18 @@ export default function PedidoCard({ pedido, onCanceled }) {
       whileHover={{ y: -2 }}
       transition={{ duration: 0.18, ease: 'easeOut' }}
       className={cn(
-        'order-consumer-card border-l-2 overflow-hidden flex flex-col',
-        'hover:border-border hover:border-l-2 transition-colors duration-150',
+        'order-consumer-card overflow-hidden flex flex-col border-l-2 transition-colors duration-150',
         leftBorder
       )}
     >
-      <div className="p-5 flex flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-4 p-5">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground mb-0.5">
+            <p className="mb-0.5 font-orbitron text-[9px] tracking-widest uppercase text-muted-foreground">
               Pedido #{pedido.id}
             </p>
-            <h3 className="font-semibold text-foreground leading-snug truncate">
+            <h3 className="truncate font-semibold leading-snug text-foreground">
               {pedido.menuNombre}
             </h3>
           </div>
@@ -48,23 +47,23 @@ export default function PedidoCard({ pedido, onCanceled }) {
           <MetaItem icon={Calendar}>{formatDate(pedido.fecha)}</MetaItem>
           <MetaItem icon={Users}>×{pedido.cantidad}</MetaItem>
           <MetaItem icon={Clock}><span className="capitalize">{pedido.turnoEntrega}</span></MetaItem>
-          <MetaItem icon={MapPin}><span className="truncate block">{pedido.puntoRetiro}</span></MetaItem>
+          <MetaItem icon={MapPin}><span className="block truncate">{pedido.puntoRetiro}</span></MetaItem>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/70">
+        <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-3">
           <p className="font-orbitron text-base font-bold text-foreground">
             {formatCurrency(pedido.total)}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {CANCELABLE_ESTADOS.includes(pedido.estado) && (
               <CancelButton pedidoId={pedido.id} onSuccess={onCanceled} size="sm" />
             )}
             <Link
               to={`/pedidos/${pedido.id}`}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+              className="flex items-center gap-1 rounded-lg px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-primary active:scale-[0.97]"
             >
-              Detalle <ChevronRight className="w-3.5 h-3.5" />
+              Detalle <ChevronRight className="size-3.5" />
             </Link>
           </div>
         </div>
