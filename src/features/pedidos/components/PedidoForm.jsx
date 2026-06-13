@@ -1,12 +1,26 @@
 import { useEffect } from 'react'
 import { Controller, useWatch } from 'react-hook-form'
 import { motion, AnimatePresence } from 'motion/react'
-import { Loader2, AlertCircle, MapPin, StickyNote, UtensilsCrossed, Calendar, Lock } from 'lucide-react'
+import {
+  Loader2,
+  AlertCircle,
+  MapPin,
+  StickyNote,
+  UtensilsCrossed,
+  Calendar,
+  Lock,
+} from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { DateInput } from '@/components/ui/date-input'
 import { cn } from '@/lib/utils'
 import AlertBanner from '@/shared/components/AlertBanner'
@@ -15,16 +29,42 @@ import { TIPO_CONFIG } from '@/features/menus/constants'
 import { TURNO_OPTIONS } from '../constants'
 import { usePedidoForm } from '../hooks/usePedidoForm'
 
-export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, onSubmit, isLoading, error, onPreviewChange }) {
-  const { form, menus, loadingMenus, sedes, loadingSedes, selectedMenu, total, canSubmit } = usePedidoForm({ defaultValues, isEdit })
-  const { register, handleSubmit, control, formState: { errors } } = form
+export default function PedidoForm({
+  defaultValues,
+  pedidoInfo,
+  isEdit = false,
+  onSubmit,
+  isLoading,
+  error,
+  onPreviewChange,
+}) {
+  const {
+    form,
+    menus,
+    loadingMenus,
+    menusError,
+    sedes,
+    loadingSedes,
+    sedesError,
+    selectedMenu,
+    total,
+    canSubmit,
+  } = usePedidoForm({ defaultValues, isEdit })
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = form
 
-  const watchMenuId   = useWatch({ control, name: 'menuId' })
+  const watchMenuId = useWatch({ control, name: 'menuId' })
   const watchCantidad = useWatch({ control, name: 'cantidad' })
 
   useEffect(() => {
     if (!onPreviewChange) return
-    onPreviewChange(selectedMenu ? { menu: selectedMenu, total, cantidad: Number(watchCantidad) || 1 } : null)
+    onPreviewChange(
+      selectedMenu ? { menu: selectedMenu, total, cantidad: Number(watchCantidad) || 1 } : null
+    )
   }, [selectedMenu, total, watchCantidad]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const sedeItems = sedes.map((s) => ({
@@ -75,16 +115,22 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
           </Label>
           {loadingMenus ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-              <Loader2 className="w-3 h-3 animate-spin" />Cargando menús...
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Cargando menús...
             </div>
+          ) : menusError ? (
+            <AlertBanner variant="error" title="No se pudieron cargar los menús">
+              {menusError}
+            </AlertBanner>
           ) : menus.length === 0 ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-              <UtensilsCrossed className="w-3.5 h-3.5" />Sin menús disponibles para esta fecha
+              <UtensilsCrossed className="w-3.5 h-3.5" />
+              Sin menús disponibles para esta fecha
             </div>
           ) : (
             <div className="grid gap-2">
               {menus.map((menu) => {
-                const tipo     = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
+                const tipo = TIPO_CONFIG[menu.tipo] ?? TIPO_CONFIG.clasico
                 const disabled = menu.cupoDisponible < 1
                 const selected = String(menu.id) === String(watchMenuId)
                 const thumbUrl = getMenuImageUrl(menu.imagenUrl)
@@ -112,7 +158,9 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
                         alt=""
                         className="h-12 w-12 shrink-0 rounded-lg border border-border object-cover"
                         loading="lazy"
-                        onError={(e) => { e.currentTarget.style.display = 'none' }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
                       />
                     ) : (
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/50">
@@ -121,8 +169,15 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-orbitron text-xs font-semibold text-foreground">{menu.nombre}</span>
-                        <span className={cn('text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px', tipo.badge)}>
+                        <span className="font-orbitron text-xs font-semibold text-foreground">
+                          {menu.nombre}
+                        </span>
+                        <span
+                          className={cn(
+                            'text-[9px] font-orbitron tracking-wider uppercase border rounded px-1.5 py-px',
+                            tipo.badge
+                          )}
+                        >
                           {tipo.label}
                         </span>
                         {disabled && (
@@ -151,7 +206,9 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
             Cantidad
           </Label>
           <Input
-            type="number" min={1} max={10}
+            type="number"
+            min={1}
+            max={10}
             {...register('cantidad')}
             className={cn(errors.cantidad && 'border-destructive')}
           />
@@ -176,7 +233,9 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
                 </SelectTrigger>
                 <SelectContent alignItemWithTrigger={false}>
                   {TURNO_OPTIONS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -188,12 +247,18 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
 
       <div className="space-y-1.5">
         <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
-          <MapPin className="inline w-3 h-3 mr-1" />Sede de entrega
+          <MapPin className="inline w-3 h-3 mr-1" />
+          Sede de entrega
         </Label>
         {loadingSedes ? (
           <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-            <Loader2 className="w-3 h-3 animate-spin" />Cargando sedes...
+            <Loader2 className="w-3 h-3 animate-spin" />
+            Cargando sedes...
           </div>
+        ) : sedesError ? (
+          <AlertBanner variant="error" title="No se pudieron cargar las sedes">
+            {sedesError}
+          </AlertBanner>
         ) : (
           <Controller
             name="puntoRetiroId"
@@ -210,7 +275,8 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
                 <SelectContent alignItemWithTrigger={false}>
                   {sedes.map((sede) => (
                     <SelectItem key={sede.id} value={String(sede.id)}>
-                      {sede.nombre}{sede.direccion ? ` — ${sede.direccion}` : ''}
+                      {sede.nombre}
+                      {sede.direccion ? ` — ${sede.direccion}` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -223,7 +289,8 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
 
       <div className="space-y-1.5">
         <Label className="text-[10px] font-orbitron tracking-widest uppercase text-muted-foreground">
-          <StickyNote className="inline w-3 h-3 mr-1" />Observaciones (opcional)
+          <StickyNote className="inline w-3 h-3 mr-1" />
+          Observaciones (opcional)
         </Label>
         <Textarea
           rows={3}
@@ -236,9 +303,13 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
       <AnimatePresence>
         {error && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <AlertBanner variant="error" title="Revisá el pedido">{error}</AlertBanner>
+            <AlertBanner variant="error" title="Revisá el pedido">
+              {error}
+            </AlertBanner>
           </motion.div>
         )}
       </AnimatePresence>
@@ -249,10 +320,16 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
         disabled={isLoading || !canSubmit}
         className="w-full font-orbitron text-xs tracking-[0.15em] uppercase h-10"
       >
-        {isLoading
-          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Procesando...</>
-          : isEdit ? 'Guardar cambios' : 'Confirmar pedido'
-        }
+        {isLoading ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Procesando...
+          </>
+        ) : isEdit ? (
+          'Guardar cambios'
+        ) : (
+          'Confirmar pedido'
+        )}
       </Button>
     </form>
   )
@@ -261,7 +338,8 @@ export default function PedidoForm({ defaultValues, pedidoInfo, isEdit = false, 
 function FieldError({ msg }) {
   return (
     <p className="flex items-center gap-1 text-xs text-destructive">
-      <AlertCircle className="w-3 h-3 shrink-0" />{msg}
+      <AlertCircle className="w-3 h-3 shrink-0" />
+      {msg}
     </p>
   )
 }

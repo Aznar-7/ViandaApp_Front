@@ -6,14 +6,15 @@
 
   <img src="./public/favicon.svg" alt="Marca de Orden 66 Viandas" width="64" />
 
-  # Orden 66 Viandas Frontend
+# Orden 66 Viandas Frontend
 
-  Aplicación web para consultar menús, gestionar pedidos y administrar la operación diaria de viandas.
+Aplicación web para consultar menús, gestionar pedidos y administrar la operación diaria de viandas.
 
-  [![React](https://img.shields.io/badge/React-19-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
-  [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-0F172A?style=flat-square&logo=tailwindcss&logoColor=38BDF8)](https://tailwindcss.com/)
-  [![Tests](https://img.shields.io/badge/tests-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)](#calidad-y-verificación)
+[![React](https://img.shields.io/badge/React-19-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-0F172A?style=flat-square&logo=tailwindcss&logoColor=38BDF8)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/tests-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)](#calidad-y-verificación)
+
 </div>
 
 ---
@@ -30,7 +31,10 @@
 - [Rutas y permisos](#rutas-y-permisos)
 - [Arquitectura](#arquitectura)
 - [Integración con la API](#integración-con-la-api)
+- [Cálculo de cupos](#cálculo-de-cupos)
+- [Responsabilidades del equipo](#responsabilidades-del-equipo)
 - [Calidad y verificación](#calidad-y-verificación)
+- [Limitaciones conocidas](#limitaciones-conocidas)
 - [Solución de problemas](#solución-de-problemas)
 - [Despliegue](#despliegue)
 
@@ -63,10 +67,11 @@ El backend es la fuente de verdad para permisos, cupos, estados y validaciones d
 
 ### Administrador
 
-- Supervisar todos los pedidos.
-- Filtrar pedidos por fecha y estado.
+- Supervisar todos los pedidos con paginación del servidor.
+- Combinar filtros por fecha, estado, menú y tipo de menú.
+- Ordenar pedidos por fecha, estado o total.
 - Confirmar, entregar o cancelar pedidos.
-- Consultar métricas e historial operativo.
+- Consultar métricas, cupos restantes, pendientes por fecha e historial operativo.
 - Crear, editar, activar y desactivar menús.
 - Crear, editar, activar y desactivar sedes.
 - Crear, editar, activar y desactivar usuarios.
@@ -88,11 +93,11 @@ Para ejecutar la aplicación completa también se necesita el backend:
 
 Puertos utilizados por defecto:
 
-| Servicio | URL |
-|---|---|
-| Frontend | `http://localhost:5173` |
-| Backend | `http://localhost:3000` |
-| API | `http://localhost:3000/api` |
+| Servicio    | URL                                |
+| ----------- | ---------------------------------- |
+| Frontend    | `http://localhost:5173`            |
+| Backend     | `http://localhost:3000`            |
+| API         | `http://localhost:3000/api`        |
 | Healthcheck | `http://localhost:3000/api/health` |
 
 ## Inicio rápido
@@ -180,11 +185,11 @@ http://localhost:5173
 
 Las siguientes cuentas son creadas por `npm run seed` en el backend:
 
-| Rol | Nombre | Email | Contraseña |
-|---|---|---|---|
-| Administrador | Admin | `admin@viandas.com` | `admin123` |
-| Usuario | Juan Perez | `juan@viandas.com` | `user123` |
-| Usuario | Maria Garcia | `maria@viandas.com` | `user123` |
+| Rol           | Nombre       | Email               | Contraseña |
+| ------------- | ------------ | ------------------- | ---------- |
+| Administrador | Admin        | `admin@viandas.com` | `admin123` |
+| Usuario       | Juan Perez   | `juan@viandas.com`  | `user123`  |
+| Usuario       | Maria Garcia | `maria@viandas.com` | `user123`  |
 
 El seed también carga menús, sedes y pedidos de ejemplo.
 
@@ -194,8 +199,8 @@ Estas credenciales son únicamente para desarrollo y pruebas. No ejecutar el see
 
 El frontend utiliza una sola variable:
 
-| Variable | Requerida | Ejemplo | Descripción |
-|---|---|---|---|
+| Variable       | Requerida        | Ejemplo                     | Descripción                           |
+| -------------- | ---------------- | --------------------------- | ------------------------------------- |
 | `VITE_API_URL` | Sí en producción | `http://localhost:3000/api` | URL base de la API, incluyendo `/api` |
 
 En desarrollo, si no se define, el cliente usa `http://localhost:3000/api`.
@@ -212,15 +217,15 @@ No agregar secretos al frontend. Toda variable con prefijo `VITE_` puede quedar 
 
 ## Comandos disponibles
 
-| Comando | Descripción |
-|---|---|
-| `npm run dev` | Inicia el servidor de desarrollo de Vite |
-| `npm run build` | Genera el build optimizado en `dist/` |
-| `npm run preview` | Sirve localmente el contenido de `dist/` |
-| `npm run lint` | Ejecuta ESLint sobre el proyecto |
-| `npm run test` | Ejecuta Vitest en modo watch |
-| `npm run test:run` | Ejecuta toda la suite una vez |
-| `npm run format` | Formatea archivos JavaScript y JSX |
+| Comando                | Descripción                                 |
+| ---------------------- | ------------------------------------------- |
+| `npm run dev`          | Inicia el servidor de desarrollo de Vite    |
+| `npm run build`        | Genera el build optimizado en `dist/`       |
+| `npm run preview`      | Sirve localmente el contenido de `dist/`    |
+| `npm run lint`         | Ejecuta ESLint sobre el proyecto            |
+| `npm run test`         | Ejecuta Vitest en modo watch                |
+| `npm run test:run`     | Ejecuta toda la suite una vez               |
+| `npm run format`       | Formatea archivos JavaScript y JSX          |
 | `npm run format:check` | Comprueba el formato sin modificar archivos |
 
 Verificación recomendada antes de publicar cambios:
@@ -242,32 +247,32 @@ npm.cmd run test:run
 
 ### Públicas
 
-| Ruta | Descripción |
-|---|---|
-| `/` | Landing page |
-| `/login` | Inicio de sesión |
-| `/register` | Registro |
+| Ruta        | Descripción      |
+| ----------- | ---------------- |
+| `/`         | Landing page     |
+| `/login`    | Inicio de sesión |
+| `/register` | Registro         |
 
 ### Usuario autenticado
 
-| Ruta | Descripción |
-|---|---|
-| `/dashboard` | Resumen personal |
-| `/menus` | Catálogo disponible |
-| `/pedidos` | Pedidos del usuario |
-| `/pedidos/nuevo` | Creación de pedido |
-| `/pedidos/:id` | Detalle del pedido |
-| `/pedidos/:id/editar` | Edición del pedido |
-| `/perfil` | Perfil y seguridad |
+| Ruta                  | Descripción         |
+| --------------------- | ------------------- |
+| `/dashboard`          | Resumen personal    |
+| `/menus`              | Catálogo disponible |
+| `/pedidos`            | Pedidos del usuario |
+| `/pedidos/nuevo`      | Creación de pedido  |
+| `/pedidos/:id`        | Detalle del pedido  |
+| `/pedidos/:id/editar` | Edición del pedido  |
+| `/perfil`             | Perfil y seguridad  |
 
 ### Administrador
 
-| Ruta | Descripción |
-|---|---|
-| `/admin` | Operación general y pedidos |
-| `/admin/menus` | Gestión de menús |
-| `/admin/sedes` | Gestión de sedes |
-| `/admin/usuarios` | Gestión de usuarios y roles |
+| Ruta                           | Descripción                    |
+| ------------------------------ | ------------------------------ |
+| `/admin`                       | Operación general y pedidos    |
+| `/admin/menus`                 | Gestión de menús               |
+| `/admin/sedes`                 | Gestión de sedes               |
+| `/admin/usuarios`              | Gestión de usuarios y roles    |
 | `/admin/pedidos/:id/historial` | Historial operativo del pedido |
 
 Las rutas administrativas requieren una sesión con rol `admin`. La API también valida el JWT y devuelve `403` cuando la cuenta no tiene permisos.
@@ -306,18 +311,89 @@ Content-Type: application/json
 
 Comportamiento global de errores:
 
-| Estado | Comportamiento |
-|---|---|
-| `401` | Limpia la sesión y redirige a login |
-| `403` | Abre un diálogo de acceso denegado |
-| `404` | Muestra notificación de recurso inexistente |
-| `500` | Muestra notificación de error interno |
+| Estado | Comportamiento                              |
+| ------ | ------------------------------------------- |
+| `401`  | Limpia la sesión y redirige a login         |
+| `403`  | Abre un diálogo de acceso denegado          |
+| `404`  | Muestra notificación de recurso inexistente |
+| `500`  | Muestra notificación de error interno       |
 
 Los módulos administrativos consumen operaciones de gestión para:
 
 - menús: creación, edición parcial, activación y desactivación;
 - sedes: creación, edición, activación y desactivación;
 - usuarios: creación, edición, asignación de rol, activación y desactivación.
+
+### Endpoints principales
+
+Todas las rutas, excepto registro, login, listado público de menús y listado público de sedes, requieren:
+
+```http
+Authorization: Bearer <token>
+```
+
+| Método         | Endpoint                              | Acceso          | Uso principal                                  |
+| -------------- | ------------------------------------- | --------------- | ---------------------------------------------- |
+| `POST`         | `/api/auth/register`                  | Público         | Registrar una cuenta                           |
+| `POST`         | `/api/auth/login`                     | Público         | Obtener JWT y usuario                          |
+| `GET`          | `/api/menus`                          | Público         | Listar menús por `fecha`, `tipo` y `activo`    |
+| `GET`          | `/api/menus/:id`                      | Admin           | Consultar un menú                              |
+| `POST`         | `/api/menus`                          | Admin           | Crear un menú                                  |
+| `PUT`          | `/api/menus/:id`                      | Admin           | Editar un menú                                 |
+| `PATCH`        | `/api/menus/:id/activar`              | Admin           | Activar un menú                                |
+| `PATCH`        | `/api/menus/:id/desactivar`           | Admin           | Desactivar un menú                             |
+| `GET`          | `/api/pedidos`                        | Autenticado     | Buscar pedidos con filtros, paginación y orden |
+| `GET`          | `/api/pedidos/:id`                    | Autenticado     | Consultar detalle                              |
+| `GET`          | `/api/pedidos/:id/historial`          | Autenticado     | Consultar historial                            |
+| `POST`         | `/api/pedidos`                        | Autenticado     | Crear pedido                                   |
+| `PUT`          | `/api/pedidos/:id`                    | Autenticado     | Editar pedido                                  |
+| `PATCH`        | `/api/pedidos/:id/cancelar`           | Autenticado     | Cancelar pedido                                |
+| `PATCH`        | `/api/pedidos/:id/confirmar`          | Admin           | Confirmar pedido                               |
+| `PATCH`        | `/api/pedidos/:id/entregar`           | Admin           | Marcar como entregado                          |
+| `GET`          | `/api/pedidos/resumen`                | Admin           | Obtener resumen operativo                      |
+| `GET/POST/PUT` | `/api/sedes` y `/api/sedes/:id`       | Según operación | Consultar y gestionar sedes                    |
+| `GET/POST/PUT` | `/api/usuarios` y `/api/usuarios/:id` | Admin           | Gestionar usuarios y roles                     |
+
+El listado de pedidos envía los parámetros `estado`, `fecha`, `menuId`, `tipo`, `page`, `limit`, `sortBy` y `order`. Los filtros, la paginación y el ordenamiento son resueltos por la API.
+
+### Errores de negocio visibles
+
+El frontend muestra el mensaje específico entregado por la API para distinguir, entre otros casos:
+
+- menú inexistente;
+- menú inactivo;
+- fecha no disponible;
+- cupo insuficiente;
+- pedido inexistente;
+- operación no permitida por estado;
+- falta de permisos.
+
+## Cálculo de cupos
+
+El backend es la fuente de verdad del cupo disponible. El frontend presenta el valor `cupoDisponible` devuelto por la API y utiliza `cupoDiario` únicamente como respaldo visual.
+
+La regla de negocio es:
+
+```text
+cupoDisponible = cupoDiario - suma(cantidad de pedidos pendientes o confirmados)
+```
+
+- Los pedidos `pendiente` y `confirmado` consumen cupo.
+- Los pedidos `cancelado` y `entregado` no consumen cupo disponible.
+- Al crear o editar un pedido, el backend valida nuevamente el cupo dentro de una transacción.
+- El panel administrador muestra el cupo restante por menú y agrupa los pedidos pendientes por fecha.
+
+## Responsabilidades del equipo
+
+Esta división puede adaptarse a los integrantes reales antes de la entrega:
+
+| Área             | Responsabilidad                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Frontend         | Rutas, componentes, formularios, consumo de API, accesibilidad, estados visuales y pruebas UI          |
+| Backend          | API REST, JWT, permisos, validaciones de negocio, persistencia, transacciones y pruebas de integración |
+| Integración y QA | Contratos HTTP, datos de prueba, documentación, revisión de flujos y verificación final                |
+
+Las decisiones compartidas incluyen nombres de campos, estados de pedido, permisos por rol, manejo de errores y criterios de aceptación.
 
 ## Calidad y verificación
 
@@ -344,6 +420,14 @@ Resultado esperado:
 - ESLint finaliza sin errores.
 - Todos los tests pasan.
 - Vite genera la carpeta `dist/`.
+
+## Limitaciones conocidas
+
+- El resumen administrativo recorre todas las páginas de pedidos pendientes para construir la agrupación por fecha. En instalaciones con volúmenes muy altos conviene trasladar esta agregación a un endpoint específico del backend.
+- El token JWT se conserva en `localStorage`, una decisión adecuada para este trabajo académico. En un entorno productivo se recomienda evaluar cookies `HttpOnly` y una estrategia de renovación de sesión.
+- Las imágenes se referencian mediante `imagenUrl`; el frontend no incluye carga binaria de archivos.
+- Los cambios concurrentes de cupo pueden hacer que un menú visible deje de tener disponibilidad antes de confirmar. La API vuelve a validar y el frontend muestra el error correspondiente.
+- No existe eliminación física de sedes, usuarios o menús vinculados a información histórica; se utiliza activación y desactivación.
 
 ## Solución de problemas
 
@@ -431,16 +515,16 @@ Publicar el contenido de `dist/` en un hosting estático.
 
 ## Stack principal
 
-| Área | Tecnología |
-|---|---|
-| UI | React 19, Tailwind CSS 4, Base UI, Lucide |
-| Navegación | React Router 7 |
-| Formularios | React Hook Form, Zod |
-| Datos | Axios |
-| Animaciones | Motion |
-| Feedback | Sonner |
-| Tooling | Vite 8, ESLint 10, Prettier |
-| Tests | Vitest, Testing Library |
+| Área        | Tecnología                                |
+| ----------- | ----------------------------------------- |
+| UI          | React 19, Tailwind CSS 4, Base UI, Lucide |
+| Navegación  | React Router 7                            |
+| Formularios | React Hook Form, Zod                      |
+| Datos       | Axios                                     |
+| Animaciones | Motion                                    |
+| Feedback    | Sonner                                    |
+| Tooling     | Vite 8, ESLint 10, Prettier               |
+| Tests       | Vitest, Testing Library                   |
 
 ---
 
