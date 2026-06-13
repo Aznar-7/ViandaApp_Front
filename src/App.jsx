@@ -3,6 +3,7 @@ import { AuthProvider } from '@/context/AuthContext'
 import { Toaster } from '@/components/ui/sonner'
 import AppRouter from '@/router'
 import ErrorBoundary from '@/shared/components/ErrorBoundary'
+import AccessDeniedDialog from '@/shared/components/AccessDeniedDialog'
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
       <BrowserRouter>
         <AuthProvider>
           <AppRouter />
+          <AccessDeniedDialog />
           <Toaster
             theme="light"
             position="top-right"

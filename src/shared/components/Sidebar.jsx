@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   ChevronLeft, ChevronRight, ClipboardList, Gauge, LogOut, Plus,
-  ShieldCheck, UtensilsCrossed, X,
+  Building2, ShieldCheck, Users, UtensilsCrossed, X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -22,12 +22,14 @@ const ADMIN_SECTIONS = [{
   label: 'Centro operativo',
   links: [
     { to: '/admin', icon: ShieldCheck, label: 'Operaciones', description: 'Pedidos y estados', code: 'A1' },
-    { to: '/menus', icon: UtensilsCrossed, label: 'Suministros', description: 'Menús y cupos', code: 'A2' },
+    { to: '/admin/menus', icon: UtensilsCrossed, label: 'Menús', description: 'Catálogo y altas', code: 'A2' },
+    { to: '/admin/sedes', icon: Building2, label: 'Sedes', description: 'Puntos de entrega', code: 'A3' },
+    { to: '/admin/usuarios', icon: Users, label: 'Usuarios', description: 'Cuentas y roles', code: 'A4' },
   ],
 }]
 
 function isRouteActive(pathname, to) {
-  if (to === '/admin') return pathname === '/admin' || pathname.startsWith('/admin/')
+  if (to === '/admin') return pathname === '/admin' || pathname.startsWith('/admin/pedidos/')
   if (to === '/dashboard') return pathname === '/dashboard'
   return pathname === to || pathname.startsWith(`${to}/`)
 }

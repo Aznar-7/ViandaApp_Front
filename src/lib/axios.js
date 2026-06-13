@@ -24,7 +24,11 @@ api.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('auth:unauthorized'))
       return Promise.reject(error)
     }
-    if (status === 403) toast.error('Acceso denegado', { description: 'Sin permisos para esta operación.' })
+    if (status === 403) {
+      window.dispatchEvent(new CustomEvent('auth:forbidden', {
+        detail: error.response?.data?.message ?? error.response?.data?.error,
+      }))
+    }
     else if (status === 404) toast.error('Recurso no encontrado', { description: 'El sector solicitado no existe en el Imperio.' })
     else if (status === 500) toast.error('Fallo en el servidor imperial', { description: 'Error interno. Los técnicos han sido alertados.' })
     return Promise.reject(error)

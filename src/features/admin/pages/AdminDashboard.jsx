@@ -10,6 +10,7 @@ import EmptyState from '@/shared/components/EmptyState'
 import ErrorMessage from '@/shared/components/ErrorMessage'
 import Pagination from '@/shared/components/Pagination'
 import CommandHeader from '@/shared/components/CommandHeader'
+import AdminModuleCards from '../components/AdminModuleCards'
 
 export default function AdminDashboard() {
   const { resumen, isLoading: loadingResumen, error: resumenError, refetch: refetchResumen } = useResumen()
@@ -32,6 +33,8 @@ export default function AdminDashboard() {
         code="ADM / O66"
         description={!isLoading && !error ? `${total} provisión${total !== 1 ? 'es' : ''} bajo supervisión del Imperio.` : 'Supervisión de provisiones, estados y acciones operativas.'}
       />
+
+      <AdminModuleCards />
 
       {/* Stat cards */}
       <div className="mb-7">

@@ -188,6 +188,7 @@
     --accent-foreground: #211f1a;
     --border: #ded8cc;
     --input: #d9d2c5;
+    color: #211f1a;
     background:
       radial-gradient(circle at 74% 0%, rgba(225, 29, 72, 0.055), transparent 26rem),
       #f4f1e9;
